@@ -1,6 +1,8 @@
 sierra-reintroduction-cmr
 ========================================================
 
+[![DOI](https://zenodo.org/badge/134973853.svg)](https://zenodo.org/badge/latestdoi/134973853)
+
 *Maxwell B. Joseph and Roland A. Knapp*
 
 This repository contains models and data to understand how the amphibian 
