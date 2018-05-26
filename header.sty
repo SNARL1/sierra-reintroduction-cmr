@@ -1,0 +1,53 @@
+% clean citations
+\usepackage{natbib}
+\bibliographystyle{ecology}
+\setcitestyle{authoryear,open={(},close={)}}
+
+% left justify
+\usepackage[document]{ragged2e}
+
+% hyperref makes references clicky. use \url{www.example.com} or \href{www.example.com}{description} to add a clicky url
+\usepackage{nameref,hyperref}
+
+% line numbers
+\usepackage[left]{lineno}
+
+\usepackage{float}
+\usepackage{caption}
+
+\usepackage[margin=1in]{geometry}
+
+% this is required to include graphics
+\usepackage{graphicx}
+
+% prevent hyphenated wrap
+\usepackage[none]{hyphenat}
+
+% bold math for matrices
+% https://tex.stackexchange.com/questions/199789/which-bold-style-is-recommended-for-matrix-notation
+\newcommand{\matr}[1]{\mathbf{#1}}
+
+% block arrays for matrices with labeled rows and columns
+\usepackage{blkarray}
+
+% monospace font for inline code
+\def\code#1{\texttt{#1}}
+
+% easy equation alignment
+% \usepackage{amsmath}
+
+% to get the degree symbol
+\usepackage{textcomp}
+\usepackage{gensymb}
+
+\usepackage{setspace}
+\doublespacing
+
+% Author info
+\usepackage{authblk}
+
+\author[1, 3]{Maxwell B. Joseph\thanks{maxwell.b.joseph@colorado.edu}}
+\affil[1]{Earth Lab, University of Colorado, Boulder, CO 80303, USA}
+\author[2, 3]{Roland A. Knapp\thanks{roland.knapp@ucsb.edu}}
+\affil[2]{Sierra Nevada Aquatic Research Laboratory, University of California, Mammoth Lakes, CA 93546, USA}
+\affil[3]{These authors contributed equally to this work.}

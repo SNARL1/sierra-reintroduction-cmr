@@ -1,0 +1,662 @@
+---
+title: Disease and climate effects on individuals jointly drive post-reintroduction
+  population dynamics of an endangered amphibian
+bibliography: library.bib
+output:
+    pdf_document:
+      keep_tex: true
+      includes:
+          in_header: header.sty
+fontsize: 12pt
+csl: ecology.csl
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, include = FALSE)
+library("knitcitations")
+cleanbib()
+options("citation_format" = "pandoc")
+library(lubridate)
+library(tidyverse)
+n_digit <- 3
+df2num <- function(df, n_digit = 3) {
+  stopifnot(nrow(df) == 1)
+  stopifnot(ncol(df) == 1)
+  df %>%
+    unlist %>%
+    round(n_digit)
+}
+```
+
+
+\newpage
+
+
+\linenumbers
+
+\begin{abstract}
+The emergence of novel pathogens often has dramatic negative effects on previously unexposed host populations. 
+Subsequent disease can drive populations and even species to extinction. 
+After establishment in populations, pathogens can continue to affect host dynamics, influencing the success or failure of species recovery efforts. 
+However, quantifying the effect of pathogens on host populations in the wild is challenging because individual hosts and their pathogens are difficult to observe. 
+Here we use long-term mark-recapture data to describe the dynamics of reintroduced populations of an endangered amphibian (\textit{Rana sierrae}) and evaluate the success of these recovery efforts in the presence of a recently-emerged pathogen, the amphibian chytrid fungus \textit{Batrachochytrium dendrobatidis}. 
+We find that high \textit{B. dendrobatidis} infection intensities are associated with increases in detectability, reductions in survival, and more infected adults. 
+We also find evidence for intensity-dependent survival, with heavily infected individuals suffering higher mortality. 
+These results highlight the need in disease ecology for probabilistic approaches that account for uncertainty in infection intensity using imperfect observational data. 
+Such approaches can advance the understanding of disease impacts on host population dynamics, and in the current study will improve the effectiveness of species conservation actions. 
+
+\bigskip
+\noindent \textbf{Key words}: \textit{Batrachochytrium dendrobatidis}; host-pathogen dynamics; mark-recapture; mountain yellow-legged frog; population establishment; recruitment; reintroduction; survival.
+
+\end{abstract}
+
+
+# Introduction
+
+Amphibians are one of the most threatened groups of vertebrates [@wake2008we]. 
+Although the drivers of amphibian decline vary taxonomically and spatially, the amphibian chytrid fungus \textit{Batrachochytrium dendrobatidis} (Bd) is a major cause of population declines and species extinctions in montane habitats worldwide [@fisher2009global; @grant2016quantitative; @skerratt2007spread]. 
+In the face of these declines, species recovery will often require introductions to restore extirpated populations, but little is known about the dynamics of population establishment and persistence of threatened amphibians [@armstrong2008directions], especially in the presence of disease. 
+Given Bd's role in eliminating populations, we expect introduction outcomes to be shaped by disease impacts on demographic rates, but measuring such impacts in wild populations is difficult [@mccallum1995detecting; @briggs2010enzootic]. 
+
+The mountain yellow-legged frog is emblematic of global amphibian declines. 
+Although formerly abundant in the relatively protected habitats of California's Sierra Nevada mountains (USA), the two species that make up this taxon (\textit{Rana muscosa} and \textit{Rana sierrae} [@vredenburg2007concordant]) have disappeared from over 93\% of historical localities, due primarily to the introduction of nonnative fish into fishless habitats [@knapp2000non; @knapp2005effects] and the emergence of Bd [@vredenburg2010dynamics]. 
+In response, both species are listed as ``endangered'' under the U.S. Endangered Species Act and included on the International Union for Conservation of Nature Red List of Threatened Species [@iucn2017]. 
+\textit{R. sierrae} has shown recent signs of recovery in the best-protected portion of its range, including Yosemite National Park, but due to dispersal limitations the re-establishment of populations may require introductions in addition to natural recovery [@knapp2016large]. 
+The effectiveness of such actions remains unclear, and the drivers of post-introduction population dynamics and introduction success or failure are poorly understood.  
+
+Introduction outcomes may be described in terms of survival, recruitment, and abundance trajectories. 
+Mark-recapture studies provide a method to estimate these quantities in wild populations while accounting for factors that can complicate inference, including imperfect detection [@jolly1965explicit; @pradel1996utilization], multiple classes within the population that may be imperfectly resolved [@lebreton2002multistate; @conn2009multistate], and incompletely observed individual-level traits [@royle2009analysis]. 
+This flexibility is critical for understanding disease impacts in wild populations. 
+Multi-state mark-recapture methods have been applied with great success to understand the population-level impacts of Bd, and differences in demographic rates between infected and uninfected classes [@murray2009impact; @pilliod2010effects; @sapsford2015infection; @hudson2016situ]. 
+
+Assuming that survival depends only on whether an individual is infected, and not considering infection intensity (i.e., load), could be problematic given that Bd-caused frog mortality is often a function of load [@briggs2010enzootic]. 
+However, individual-level infection data are often not available. 
+For example, Bd load may not be observed if an individual is not encountered or captured on a survey, or if they are captured but no infection data are collected. 
+This presents a major challenge: infection intensity is hard to measure, but may be critical for understanding population dynamics. 
+Previous efforts to understand disease impacts in wild populations as a function of load at the individual level have randomly imputed missing infection load data with the observed distribution of load values [@spitzen2017fragile]. 
+However, random imputation could bias inference if load data are not missing at random, for example, if load-dependent disease affects detection. 
+
+In this paper, we use a Bayesian multi-state model with data from decade-long mark-recapture studies in two reintroduced frog populations to understand the influence of disease and climate on introduction outcomes. 
+We find that disease dynamics affect introduction success, with high infection intensities leading to more infected adults, a reduction in adult survival, and adults that are easier to detect. Recruitment and uninfected adult survival are also important for population persistence. Differential detectability of adults related to infection intensity points to broader questions about understanding disease impacts in wild populations, and highlights the importance of understanding hidden infection dynamics at the individual level. 
+These insights will inform ongoing and future efforts aimed at restoring the  endangered mountain yellow-legged frog, and provide a means to quantitatively assess why some introduction efforts fail and others succeed. 
+
+# Methods
+
+## Field sites and methods
+
+The two study lakes are located in eastern Yosemite National Park (California, USA) at elevations of 2880 and 3200 m. \textit{R. sierrae} populations in both lakes were established via translocation from a single nearby donor population (elevation: 3176 m). 
+The donor population has been Bd-positive for at least two decades [@fellers2001oral], and contains one of the largest \textit{R. sierrae} populations in Yosemite (minimum population size during this study: 600-1500 adults). 
+The introduction lakes are located 5.5-7.0 km from the donor population and both contain high quality \textit{R. sierrae} habitat (i.e., fishless, 6-12 m deep, with adjacent meadow and stream habitats) [@knapp2005effects]. 
+Because these lakes harbor a sensitive species, we refer to them by the pseudonyms Alpine and Subalpine [@lindenmayer2017not].
+Visual encounter surveys [@knapp2005effects] conducted just prior to the first introductions indicated that both lakes lacked \textit{R. sierrae} of any life stage. 
+Prior to introduction, adult frogs ($\geq$ 40 mm snout-vent length (SVL)) were captured at the donor site, and tagged (8mm passive integrated transponder (PIT) tags), measured, and weighed. 
+To estimate Bd load, we also collected a skin swab from each frog using standard methods [@Hyatt2007diagnostic; @vredenburg2010dynamics]. 
+
+The initial introduction of frogs to Alpine and Subalpine occurred during summer 2006 and 2008, respectively, and additional introductions to supplement both populations were conducted in subsequent years. 
+In the first introduction to Alpine, frogs were transported on foot; in all subsequent introductions to both Alpine and Subalpine, frogs were transported via helicopter (Table \ref{tab:table1}). 
+
+To describe the dynamics of the introduced populations, both populations were assessed for 10-12 years using mark-recapture methods.
+Between 2006 and 2012, lakes were visited approximately once per month during the summer active season (June-September) and on a single day (primary period) all habitats were searched repeatedly for frogs which were captured using hand-held nets. Adult frogs were identified via their PIT tag (or tagged if they were untagged), measured, weighed, swabbed, and released at the capture location. 
+During 2013-2017, we adopted a robust design in which all habitats were searched during several consecutive days (surveys), and frogs processed as described above. 
+Within a primary period, frogs that were captured on more than one survey were measured, weighed, and swabbed only when first captured.     
+
+Skin swabs were analysed using standard Bd DNA extraction and qPCR methods [@boyle2004rapid] except that swab extracts were analyzed singly instead of in triplicate [@kriger2006cost, @vredenburg2010dynamics]. 
+During 2005-2014, we used standards developed from known concentrations of zoospores [@boyle2004rapid] and after 2014 we used standards based on single ITS1 PCR-amplicons [@longo2013its1]. 
+Based on paired comparisons between samples analyzed using both types of standards, Bd in the study area has an average of 60 ITS1 copies per zoospore. 
+To express all qPCR results as the number of ITS1 copies, starting quantities obtained using the zoospore standard (measured as “zoospore equivalents”) were multiplied by 60. In addition, all qPCR quantities (regardless of standard) were multiplied by 80 to account for the fact that DNA extracts from swabs were diluted 80-fold during extraction and PCR [@vredenburg2010dynamics]. 
+
+We acquired hourly air temperature and daily snow depth data from two nearby meteorological stations (ERY and DAN, respectively) and snow water equivalent data from a manually-measured snow course (DAN; California Data Exchange Center - http://cdec.water.ca.gov). 
+The stations and snow course are 5-17 km from the study lakes. 
+We used snow water equivalent as measured on April 1 of each year as a measure of winter severity, to be used as a covariate for frog recruitment and survival. 
+Daily snow depth data were acquired to model survey occurrence as described below.
+To better understand the detection process, we averaged hourly air temperature data collected between 0900-1600 on each day a survey took place, to derive a ``survey air temperature'' metric. 
+
+## Model development
+
+We developed a hierarchical Bayesian hidden Markov model to understand how environmental factors and partly observed time-varying individual traits (Bd loads) jointly drive population dynamics. 
+This model also needed to account for the partly deterministic recruitment process that arises with introductions. 
+The result is an extended open population Jolly-Seber mark-recapture model with known additions to the population (introduced adults), continuous uncertain disease states of individuals which may or may not be captured, and sampling that is unevenly distributed in time. 
+
+```{r get-pct-missing-swabs}
+load('alpine.RData')
+alpine_n_missing <- sum(Y == 4)
+alpine_n <- sum(Y > 1)
+
+load('subalpine.RData')
+subalpine_n_missing <- sum(Y == 4)
+subalpine_n <- sum(Y > 1)
+
+total_swabs <- alpine_n + subalpine_n
+prop_miss <- (alpine_n_missing + subalpine_n_missing) / total_swabs
+pct_miss <- 100 * prop_miss
+```
+
+In a small number of cases, adults were captured, weighed, and measured, but no swab data were associated with the capture (e.g., if a swab was lost). 
+In these cases (`r round(pct_miss, 1)`\% of `r total_swabs` swabs), capture data indicate that the adult was alive during the survey, but its infection status is unknown. 
+As such, there are three possible observations for captured frogs: detected/infected, detected/uninfected, and detected/unknown infection status. 
+A fourth possible observation class corresponds to non-detection: an individual was not observed during a survey. 
+
+## Mark-recapture model structure
+
+We consider four possible observations for each individual $i=1, ..., M$ on each survey $j=1, ..., n_j$: $o_{i, j} = 1$ indicates that the individual was not detected; $o_{i, j}=2$ indicates that the individual was observed and the swab collected for that individual indicated that they were uninfected; $o_{i, j}=3$ indicates that the individual was observed and results from the collected swab showed that the frog had a non-zero Bd load; and $o_{i, j}=4$ indicates that the individual was observed, but no swab data were available from the capture. 
+
+We use parameter-expanded data augmentation to account for the fact that the total number of adults in the population is unknown [@royle2012parameter]. 
+Across the entire time period of the study, we assume $N_s$ individuals have existed in the population, comprising the superpopulation of individuals that were present at some time. 
+While $N_s$ is not directly observable, across all surveys $n \leq N_s$ unique individuals were known to be present in the population (because they were introduced and/or captured). 
+An estimate of $N_s$ can be acquired by considering a large number $M > N_s$ of individuals, $M - N_s$ of which never existed [@royle2009analysis]. 
+Thus, the model has a state corresponding to individuals that have not recruited yet. 
+Here, $M$ was chosen to be 2218 at Alpine (618 observed unique individuals plus 1600 augmented individuals), and 558 at Subalpine (158 observed individuals, and 400 augmented individuals). 
+These values were chosen to be considerably greater than our prior guess of $N_s$, and we also verified that posterior estimates of $N_s$ were much less than $M$ to avoid problems on the boundary of this augmented parameter space [@dennis2015computational]. 
+
+We denote the true state of individual $i$ in primary period $t$ as $u_{i, t}$, for every individual $i = 1, ..., M$ and each primary period $t = 1,..., n_t$. 
+The four states that we consider are: $u_{i, t} = 1$ for individuals that have not recruited, $u_{i, t} =2$ for uninfected adults, $u_{i, t} = 3$ for infected adults, and $u_{i, t} = 4$ for dead individuals. 
+Each survey $j=1, ..., n_j$ occurs in one of the $n_t$ primary periods, and we denote the primary period in which survey $j$ takes place as $t_j$. 
+Each primary period $t$ occurs within one year, but within a year there are multiple primary periods.
+We set the year containing the first primary period to $y_{t = 1} = 1$, and generally $y_t$ represents the year containing primary period $t$. 
+Years increment by one until the final year of the mark recapture efforts, which we denote $n_y$: $y \in \{1, 2, ..., n_y\}$.
+We assume that within a primary period, the state of each individual does not change (i.e., individuals do not recruit into the adult population, gain or lose Bd infection, or die). 
+This assumption is justified by the short time intervals between surveys within primary periods.
+
+### Observation model
+
+An emission matrix $\matr{\Omega}_{i, j}$ links observations to hidden states, with the elements of $\matr{\Omega}_{i, j}$ providing the probability of each possible observation of individual $i$ in survey $j$, given the true hidden state. 
+The rows in $\matr{\Omega}_{i, j}$ correspond to the state of individual $i$ in primary period $t_j$, and the columns correspond to an observation of individual $i$ in survey $j$:
+
+\[
+\matr{\Omega}_{i, j} =
+\begin{blockarray}{ccccc}
+  \text{Not detected} & \text{Bd negative} & \text{Bd positive} & \text{Bd unknown} & \\
+    o_{i, j} = 1 & o_{i, j} = 2 & o_{i, j} = 3 & o_{i, j} = 4 \\
+\begin{block}{(cccc)c}
+  1 & 0 & 0 & 0 & \begin{tabular}{@{}c@{}}Not recruited \\ $u_{i, t_j} = 1$ \end{tabular} \\
+  1 - p_{i, j}^- & p^-_{i, j} \delta & 0 & p^-_{i, j} (1 - \delta) & \begin{tabular}{@{}c@{}}Uninfected \\ $u_{i, t_j} = 2$ \end{tabular} \\
+  1 - p_{i, j}^+ & 0 & p^+_{i, j} \delta & p^+_{i, j} (1 - \delta) & \begin{tabular}{@{}c@{}}Infected \\ $u_{i, t_j} = 3$ \end{tabular} \\
+  1 & 0 & 0 & 0 & \begin{tabular}{@{}c@{}}Dead \\ $u_{i, t_j} = 4$ \end{tabular} \\
+\end{block}
+\end{blockarray}
+ \]
+
+\noindent The structure of $\matr{\Omega}_{i, j}$ implies that there are no mistaken individual identifications (those that are dead or not recruited are never detected), and that a swab successfully makes it to the lab and provides qPCR data with probability $\delta$, conditional on the animal being detected. 
+Detection probabilities are provided by $p^-_{i, j}$ for uninfected (Bd negative) and $p^+_{i, j}$ for infected (Bd positive) individuals, and these detection probabilities can vary by individual and survey.
+We also assume that there are no false-positive or false-negative Bd results [@Hyatt2007diagnostic], though relaxing this assumption may be a promising future area, given the potential sensitivity of swab results to infection intensity [@miller2012estimating]. 
+
+### State model
+
+The hidden states of each individual evolve as a Markov process with transition matrix $\matr{\Psi}_{i, t}$, the entries of which provide the probability of transitioning to state $u_{i, t + 1}$ (the column index) from state $u_{i, t}$ (the row index). 
+This matrix is different for individuals that naturally recruit versus those that recruit deterministically due to introduction. 
+For naturally recruiting individuals:
+
+\[
+\matr{\Psi}_{i, t} =
+\begin{blockarray}{ccccc}
+  \text{Not recruited} & \text{Uninfected} & \text{Infected} & \text{Dead} & \\
+    u_{i, t+1} = 1 & u_{i, t+1} = 2 & u_{i, t+1} = 3 & u_{i, t+1} = 4 \\
+\begin{block}{(cccc)c}
+  1 - \lambda_t & \lambda_t (1 - \gamma_t) & \lambda_t \gamma_t & 0 & \begin{tabular}{@{}c@{}}Not recruited \\ $u_{i, t} = 1$ \end{tabular} \\
+  0 & \phi^-_{i, t} (1 - \eta^+_t) & \phi^-_{i, t} \eta^+_t & 1 - \phi^-_{i, t} & \begin{tabular}{@{}c@{}}Uninfected \\ $u_{i, t} = 2$ \end{tabular} \\
+  0 & \phi^+_{i, t} \eta^-_t & \phi^+_{i, t} (1 - \eta^-_t) & 1 - \phi^+_{i, t} & \begin{tabular}{@{}c@{}}Infected \\ $u_{i, t} = 3$ \end{tabular} \\
+  0 & 0 & 0 & 1 & \begin{tabular}{@{}c@{}}Dead \\ $u_{i, t} = 4$ \end{tabular} \\
+\end{block}
+\end{blockarray}
+ \]
+
+\noindent where $\lambda_t$ is the probability that an individual enters the adult population between primary periods $t$ and $t + 1$, $\gamma_t$ is the probability that a recruiting individual is infected conditional on entry, $\phi^-_{i, t}$ is a survival probability for an uninfected adult, $\phi^+_{i, t}$ is a survival probability for an infected adult, $\eta^+_t$ is the probability of transitioning from the uninfected to infected class conditional on survival, and $\eta^-_t$ is the probability of transitioning from the infected to uninfected class conditional on survival. 
+
+For introduced individuals, the recruitment process is deterministic. 
+Specifically, for each introduced adult, there is zero chance that they recruit prior to the primary period in which they are introduced, and if they are introduced at time $t\textsuperscript{intro}_i$, then the probability that they recruit into a particular class (their state upon introduction) must be one. 
+For these introductions, all introduced adults were infected, and thus recruited into the infected adult class, leading to the following transition matrix for introduced animals, where the recruitment process is completely determined by $t\textsuperscript{intro}_i$, such that $\matr{\Psi}_{i, t}$ is:
+
+\[
+\begin{blockarray}{ccccc}
+  \text{Not recruited} & \text{Uninfected} & \text{Infected} & \text{Dead} & \\
+    u_{i, t+1} = 1 & u_{i, t+1} = 2 & u_{i, t+1} = 3 & u_{i, t+1} = 4 \\
+\begin{block}{(cccc)c}
+  1 - I_{(t = (t\textsuperscript{intro}_i - 1))} & 0 & I_{(t = (t\textsuperscript{intro}_i - 1))} & 0 & \begin{tabular}{@{}c@{}}Not recruited \\ $u_{i, t} = 1$ \end{tabular} \\
+  0 & \phi^-_{i, t} (1 - \eta^+_t) & \phi^-_{i, t} \eta^+_t & 1 - \phi^-_{i, t} & \begin{tabular}{@{}c@{}}Uninfected \\ $u_{i, t} = 2$ \end{tabular} \\
+  0 & \phi^+_{i, t} \eta^-_t & \phi^+_{i, t} (1 - \eta^-_t) & 1 - \phi^+_{i, t} & \begin{tabular}{@{}c@{}}Infected \\ $u_{i, t} = 3$ \end{tabular} \\
+  0 & 0 & 0 & 1 & \begin{tabular}{@{}c@{}}Dead \\ $u_{i, t} = 4$ \end{tabular} \\
+\end{block}
+\end{blockarray}
+ \]
+
+\noindent where  $I_{(t = (t\textsuperscript{intro}_i - 1))}$ is an indicator function equal to one when $t$ is equal to $t\textsuperscript{intro}_i - 1$. 
+
+An imaginary first primary period augments the collection of primary periods when introductions took place and when surveys occurred, and was set to occur one week before the initial introductions into each population. 
+For this augmented period $t = 1$, we assume that all individuals are in the ``not-recruited'' class, $u_{i, 1} = 1$ for $i = 1, ..., M$ (Figure \ref{hmm-structure}). 
+Given that neither lake was known to contain adult frogs immediately prior to introduction, this is potentially a fair assumption, but in case the assumption was violated and adults were present prior to the introduction, we include a time-varying adjustment into the recruitment model (described below).
+
+The number of primary periods was not uniform across survey years, and as such, the time between primary periods was also heterogeneous, complicating the interpretation of transition probabilities. 
+Thus, at both sites, we used augmented primary periods to increase the regularity of time intervals between primary periods. 
+These were chosen to occur when primary periods might have occurred, e.g., not during the winter months when the lakes are snow-covered, using a statistical model of when surveys are conducted. 
+At each site, we fit a binomial generalized additive model with thin plate spline smoothers for day-of-year and daily snow depth at Dana Meadows, where the response variable was zero or one for each day, with one indicating that a survey took place. 
+These models were fit using the \code{gam} function in the mgcv package in the R programming language [@r-lang; @wood2017]. 
+Then, we predicted new values from these models, with the goal of augmenting the set of primary periods for each year at each site until all years except the first and last had the same number of primary periods (the maximum number of primary periods within one year at each site: ten at Alpine and eight at Subalpine). 
+Augmented primary periods were only accepted if there was no primary period within five days (before and after) of the proposed augmented primary period. 
+The end result is a set of primary periods that are more uniformly distributed in time than the original collection of empirical primary periods, though these augmented primary periods are not associated with real surveys. 
+
+### Parameter model
+
+#### Detection probabilities
+
+Among uninfected adult frogs, we assume that the probability of detection varies with survey air temperature [@sinsch1984thermal], so that 
+
+$$\text{logit}(p_{i, j}^-) = \alpha^{(p)} + \beta^{(p, x)} x_{j},$$
+
+\noindent where $\alpha^{(p)}$ is an intercept parameter, $\beta^{(p, x)}$ is the effect of survey air temperature on detection probability, and $x_j$ is the survey air temperature for survey $j$, for all $i, j$. 
+Among infected adult frogs, the detection model was expanded to allow for an adjustment to account for being infected, and a further adjustment to deal with variation due to Bd load: 
+
+$$\text{logit}(p_{i, j}^+) = \alpha^{(p)} + \beta^{(p, x)} x_{j} + \beta^{(p, +)} + \beta^{(p, z)} z_{i, t_j},$$
+
+\noindent where $\beta^{(p, +)}$ is the adjustment on the intercept for infected adults, and $\beta^{(p, z)}$ is a coefficient for the log Bd load $z_{i, t_j}$ of individual $i$ in primary period $t$ containing survey $j$, for all $i, j$. 
+
+
+#### Recruitment probabilities
+
+The recruitment model was designed to account for annual variation in Bd loads, whether primary periods spanned years, and winter severity. 
+For the probability of entering the population between primary period $t$ and $t+1$, we have: 
+
+$$\text{logit}(\lambda_t) = \alpha^{(\lambda)} + \beta^{(\lambda, w)} w_t + \beta^{(\lambda, s)} s_{y_t} + \beta^{(\lambda, 1)} I_{(t = 1)} + \epsilon^{(\lambda)}_{y_t},$$
+
+\noindent where $\alpha^{(\lambda)}$ is an intercept term, and the effect of an overwinter transition is represented as $\beta^{(\lambda, w)}$, with $w_t$ as a binary indicator of whether a transition from period $t$ to $t + 1$ spans a winter (or equivalently, two years).
+The effect of the previous winter's severity is $\beta^{(\lambda, s)}$, where $s_{y_t}$ is previous winter's severity. 
+The parameter $\beta^{(\lambda, 1)}$ is an adjustment for the recruitment probability after the first imaginary primary period, which could account for undetected individuals present prior to introduction.
+Finally, $\epsilon^{(\lambda)}_{y_t}$ is an adjustment to account for extra annual variation. 
+The probability that an individual is infected, conditional on recruitment is modeled as a function of expected Bd load among infected adults: 
+
+$$\text{logit}(\gamma_t) = \alpha^{(\gamma)} + \beta^{(\gamma, \mu)} \mu_{y_t} + \epsilon^{(\gamma)}_{y_t},$$
+
+\noindent where $\alpha^{(\gamma)}$ is an intercept, $\beta^{(\gamma, \mu)}$ represents the effect of mean Bd load among infected adults in the year containing primary period $t$ (denoted $\mu_{y_t}$), and $\epsilon^{(\gamma)}_{y_t}$ is a year-specific adjustment. 
+
+#### Survival probabilities
+
+Survival of uninfected adults was modeled as a function of whether a transition spanned an overwinter period and winter severity: 
+
+$$\text{logit}(\phi_{i, t}^-) = \alpha^{(\phi^-)} + \beta^{(\phi^-, w)} w_t + \beta^{(\phi^-, s)} s_{y_t} + \epsilon^{(\phi^-)}_{y_t},$$
+
+\noindent where $\alpha^{(\phi^-)}$ is an intercept parameter, $\beta^{(\phi^-, w)}$ is an adjustment for overwinter transitions, $\beta^{(\phi^-, s)}$ is a coefficient for winter severity, and $\epsilon^{(\phi^-)}_{y_t}$ is a year-specific adjustment. 
+The survival probabilities for infected adults were similarly modeled, but with additional effects of individual Bd load: 
+
+$$\text{logit}(\phi_{i, t}^+) = \alpha^{(\phi^+)} + \beta^{(\phi^+, w)} w_t + \beta^{(\phi^+, s)} s_{y_t} + \beta^{(\phi^+, z)} z_{i, t} + \epsilon^{(\phi^+)}_{y_t},$$
+
+\noindent where $z_{i, t}$ is the log transformed Bd load of individual $i$ during primary period $t$, $\beta^{(\phi^+, z)}$ is a coefficient for Bd load, and the remainder of parameters are defined using the same notation as for the survival of uninfected adults. 
+
+#### Loss and gain of infection probabilities
+
+The probability that an infected adult loses infection was modeled as a function of mean Bd load in the infected population, and whether a transition occurred from one year to the next: 
+
+$$\text{logit}(\eta_t^-) = \alpha^{(\eta^-)} + \beta^{(\eta^-, \mu)} \mu_{y_t} + \epsilon^{(\eta^-)}_{y_t},$$
+
+\noindent where $\alpha^{(\eta^-)}$ is an intercept, $\beta^{(\eta^-, \mu)}$ is the effect of expected Bd load among infected adults, and  $\epsilon^{(\eta^-)}_{y_t}$ is a year-specific adjustment. 
+Transitions from the uninfected to infected class were modeled similarly: 
+
+$$\text{logit}(\eta_t^+) = \alpha^{(\eta^+)} + \beta^{(\eta^+, \mu)} \mu_{y_t} + \epsilon^{(\eta^+)}_{y_t}$$
+
+\noindent where parameter notation conventions and definitions match those for transitions from the infected to uninfected classes. 
+
+#### Bd loads
+
+The fact that individuals are imperfectly detected, and that occasionally, individuals are detected but no disease information is recorded presents a challenge for including individual-level Bd loads in the model. 
+Within the infected population, Bd loads are partially observed when individuals are captured and swabs are collected. 
+We used a normal distribution to represent (potential) log Bd loads: 
+
+$$[\matr{Z} | \mu, \sigma] = \prod_{i = 1}^M \prod_{t = 1}^{n_t} \text{Normal}(z_{i, t} | \mu_{y_t}, \sigma)$$
+
+\noindent When the load of individual $i$ during primary period $t$ was observed, this specifies a likelihood. 
+Otherwise, this specifies a prior distribution for the potential log load of individual $i$ on primary period $t$, conditional on infection. 
+The expected value of Bd load among infected adults was assumed to vary among years, and potentially vary as a function of winter severity:
+
+$$[\mu | \alpha^{(\mu)}, \beta^{(\mu)}, \sigma^{(\mu)}] = \prod_{y = 1}^{n_y} \text{Normal}(\mu_{y} | \alpha^{(\mu)} + \beta^{(\mu)} s_y, \sigma^{(\mu)})$$
+
+#### Prior distributions
+
+Based on knowledge of the observation process, we expected that most captures resulted in a non-missing swab result, leading to the specification for the prior on $\delta$ as $[\delta] = \text{Beta}(\delta | 9, 1)$.
+Annual adjustments were modeled using zero-mean normal distributions with unknown standard deviations specific to the process of interest, e.g., for the probability of entering the population: $[\epsilon^{(\lambda)}] = \prod_{y = 1}^{n_y} \text{Normal}(\epsilon^{(\lambda)}_y | 0, \sigma^{(\epsilon^{(\lambda)})})$. 
+Standard deviation parameters were given half normal priors i.e., $[\sigma^{(\epsilon^{(\lambda)})}] = \text{Normal}_+(\sigma^{(\epsilon^{(\lambda)})} | 0, 1.5)$, and all remaining parameters were given $\text{Normal}(0, 1.5)$ priors.
+The full factorization of the joint distribution of data and parameters is provided in \hyperref[joint-distribution]{Appendix A: Joint distribution factorization}.
+
+#### Parameter estimation
+
+We implemented the model in Stan, a probabilistic programming language, and sampled from the approximate posterior distribution of parameters with automatic differentiation variational inference [@carpenter2016stan; @kucukelbir2015automatic].
+We used the forward algorithm [@zucchini2016hidden] to circumvent the need to sample from the discrete space of true individual states (see \hyperref[forward-algorithm]{Appendix B: Forward algorithm description} for details).
+Variational inference uses a simple family of distributions as an approximation of the posterior distribution, optimizing parameters of this simpler approximation (the variational distribution) to minimize the Kullback-Leibler divergence between the true posterior and the variational distribution. 
+A variational approximation was necessary for the models to run in a reasonable amount of time ($\approx 2-4$ hours) on finite resources (r4.2xlarge EC2 instances on Amazon Web Services, with 8 virtual CPUs and 61 GiB RAM). 
+To verify our model implementation, we simulated data with known parameters from the model to evaluate parameter recovery, and check that parameters were identifiable. 
+These simulations allowed us to identify a lack of identifiability in an earlier model specification which included multiplicative interaction terms between winter severity and Bd load for both the probability of entering the population, and the probability that new adults were infected conditional on recruitment.
+
+All code and data necessary to reproduce the analysis and manuscript is publicly available at [https://www.github.com/snarl1/sierra-reintroduction-cmr](https://www.github.com/snarl1/sierra-reintroduction-cmr). 
+The workflow is wrapped into GNU Make command [@Stallman2004], the manuscript is written in R Markdown [@rmarkdown], and we used the R programming language [@r-lang] with the assertthat, ggrepel, ggridges, ggthemes, lubridate, mgcv, patchwork, reshape2, rstan, and tidyverse packages to facilitate data processing, model fitting, and visualization [@assertthat; @ggrepel; @ggridges; @ggthemes; @lubridate; @mgcv; @patchwork; @reshape2; @rstan; @tidyverse].
+The computational environment with these dependencies is containerized via Docker, and the Dockerfile for the image exists in the GitHub repository for this project [@boettiger2015introduction].
+
+# Results
+
+```{r load-detection-results}
+detection_probs <- read_csv('out/detection-probs.csv')
+detection_effs <- read_csv('out/detection-effs.csv')
+```
+
+At both sites, infected adults were easier to detect than uninfected adults, and detection probabilities also increased with survey air temperature (Figure \ref{detection-effects}A). 
+For a survey with an air temperature of `r unique(round(detection_probs$air_temp))` \degree C, the estimated probability of detecting an uninfected adult at Alpine was `r filter(detection_probs, site == 'Alpine', Group == 'Uninfected adults') %>% select(med) %>% df2num` (`r filter(detection_probs, site == 'Alpine', Group == 'Uninfected adults') %>% select(lo) %>% df2num`, `r filter(detection_probs, site == 'Alpine', Group == 'Uninfected adults') %>% select(hi) %>% df2num`; posterior median and 90\% CI), but for an infected adult with average Bd load, the probability of detection was `r filter(detection_probs, site == 'Alpine', Group == 'Bd infected adults') %>% select(med) %>% df2num` (`r filter(detection_probs, site == 'Alpine', Group == 'Bd infected adults') %>% select(lo) %>% df2num`, `r filter(detection_probs, site == 'Alpine', Group == 'Bd infected adults') %>% select(hi) %>% df2num`).
+At Subalpine, for a survey with the same air temperature, the probability of detecting an uninfected adult was `r filter(detection_probs, site == 'Subalpine', Group == 'Uninfected adults') %>% select(med) %>% df2num` (`r filter(detection_probs, site == 'Subalpine', Group == 'Uninfected adults') %>% select(lo) %>% df2num`, `r filter(detection_probs, site == 'Subalpine', Group == 'Uninfected adults') %>% select(hi) %>% df2num`), but the probability of detecting an infected adult with an average Bd load was `r filter(detection_probs, site == 'Subalpine', Group == 'Bd infected adults') %>% select(med) %>% df2num` (`r filter(detection_probs, site == 'Subalpine', Group == 'Bd infected adults') %>% select(lo) %>% df2num`, `r filter(detection_probs, site == 'Subalpine', Group == 'Bd infected adults') %>% select(hi) %>% df2num`). 
+Among infected adults, there was evidence for additional increases in detectability with increases in Bd load in the Alpine population (posterior median for $\beta^{(p, z)}$: `r detection_effs %>% filter(site == 'Alpine', Parameter == 'Bd load') %>% select(med) %>% df2num`, 90\% CI: `r detection_effs %>% filter(site == 'Alpine', Parameter == 'Bd load') %>% select(lo) %>% df2num`, `r detection_effs %>% filter(site == 'Alpine', Parameter == 'Bd load') %>% select(hi) %>% df2num`) but not in the Subalpine population ($\beta^{(p, z)}$: `r detection_effs %>% filter(site == 'Subalpine', Parameter == 'Bd load') %>% select(med) %>% df2num`, 90\% CI: `r detection_effs %>% filter(site == 'Subalpine', Parameter == 'Bd load') %>% select(lo) %>% df2num`, `r detection_effs %>% filter(site == 'Subalpine', Parameter == 'Bd load') %>% select(hi) %>% df2num`) (Figure \ref{detection-effects}B). 
+
+```{r load-bd-load-results}
+bd_load_correlations <- read_csv('out/bd-load-correlations.csv')
+beta_z_df <- read_csv('out/beta-z-df.csv')
+```
+
+Despite the two study populations being 12 km apart, mean Bd loads among infected adults varied synchronously between populations. 
+After initial introduction in 2006 or 2008, mean loads at both sites were typically between 1,000 and 10,000 copies, with a reduction in mean Bd load during the year following the first introduction (Figure \ref{mean-bd-loads}). 
+Thereafter, loads were relatively low and stable through 2012. 
+At both sites mean loads were uncharacteristically low in 2013 but increased in subsequent years until reaching a peak in 2016. 
+Mean Bd loads at Subalpine tended to be higher than at Alpine, particularly in the period from 2015 - 2017. 
+The estimated correlation over time between mean log Bd loads at the two study sites was `r median(unlist(bd_load_correlations)) %>% round(n_digit)` (`r quantile(unlist(bd_load_correlations), .05) %>% round(n_digit)`, `r quantile(unlist(bd_load_correlations), .95) %>% round(n_digit)`). 
+This correlation was not due to a shared response to winter severity because winter severity did not influence Bd load at either site (at Alpine $\beta^{(\mu)}$: `r beta_z_df %>% filter(site == "Alpine") %>% select(med) %>% df2num` (`r beta_z_df %>% filter(site == "Alpine") %>% select(lo) %>% df2num`, `r beta_z_df %>% filter(site == "Alpine") %>% select(hi) %>% df2num`), at Subalpine $\beta^{(\mu)}$: `r beta_z_df %>% filter(site == "Subalpine") %>% select(med) %>% df2num` (`r beta_z_df %>% filter(site == "Subalpine") %>% select(lo) %>% df2num`, `r beta_z_df %>% filter(site == "Subalpine") %>% select(hi) %>% df2num`).
+
+```{r get-nsuper}
+nsuper <- read_csv('out/n_summ.csv')
+```
+
+Following initial introduction, both sites experienced multiple years of low abundance, but in 2013 the adult population at Alpine began increasing, reaching values upwards of 400 adults by late-summer 2016 (Figure \ref{abundance-survival-time-series}A). 
+In contrast, at Subalpine, the adult population probably has not exceeded 50 individuals over much of the study duration, and introduction events account for the largest recruitment pulses.
+At both sites, infected adults tended to outnumber uninfected adults throughout the study period.
+The total number of adults to have ever existed ($N_s$) was estimated to be `r filter(nsuper, site == 'Alpine') %>% select(med) %>% df2num(n_digit = 0)` (`r filter(nsuper, site == 'Alpine') %>% select(lo) %>% df2num(n_digit = 0)`, `r filter(nsuper, site == 'Alpine') %>% select(hi) %>% df2num(n_digit = 0)`) at Alpine, and `r filter(nsuper, site == 'Subalpine') %>% select(med) %>% df2num(n_digit = 0)` (`r filter(nsuper, site == 'Subalpine') %>% select(lo) %>% df2num(n_digit = 0)`, `r filter(nsuper, site == 'Subalpine') %>% select(hi) %>% df2num(n_digit = 0)`) at Subalpine. 
+
+```{r load-survival-params}
+survival_params <- read_csv('out/survival-params.csv')
+```
+
+Infected adults experienced decreased overwinter survival, especially in the Subalpine population, unlike uninfected adults which maintained overwinter survival that was comparable to within-summer survival (Figure \ref{abundance-survival-time-series}B). 
+Bd load reduced infected adult survival at Alpine (Figure \ref{bd-load-survival}), with $\beta^{(\phi^+, z)}$ estimated to be `r survival_params %>% filter(Parameter == 'Bd load effect', Site == 'Alpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'Bd load effect', Site == 'Alpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'Bd load effect', Site == 'Alpine') %>% select(hi) %>% df2num`) at Alpine, and `r survival_params %>% filter(Parameter == 'Bd load effect', Site == 'Subalpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'Bd load effect', Site == 'Subalpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'Bd load effect', Site == 'Subalpine') %>% select(hi) %>% df2num`) at Subalpine. 
+Winter severity appeared to increase survival of Bd infected adults at Alpine ($\beta^{(\phi^+, s)}$: `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Alpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Alpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Alpine') %>% select(hi) %>% df2num`), but may have been associated with lower survival at Subalpine (`r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Subalpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Subalpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Subalpine') %>% select(hi) %>% df2num`)). 
+At both sites, winter severity coefficients overlapped zero for uninfected adults ($\beta^{(\phi^-, s)}$: `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Uninfected adults', Site == 'Alpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'SWE effect', group == 'Uninfected adults', Site == 'Alpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Uninfected adults', Site == 'Alpine') %>% select(hi) %>% df2num`) at Alpine, and `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Uninfected adults', Site == 'Subalpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'SWE effect', group == 'Uninfected adults', Site == 'Subalpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Uninfected adults', Site == 'Subalpine') %>% select(hi) %>% df2num`) at Subalpine).
+Overall, uninfected adults had higher survival at Alpine ($\alpha^{(\phi^-)}$: `r survival_params %>% filter(Parameter == 'Intercept', group == 'Uninfected adults', Site == 'Alpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'Intercept', group == 'Uninfected adults', Site == 'Alpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'Intercept', group == 'Uninfected adults', Site == 'Alpine') %>% select(hi) %>% df2num`)) than Subalpine ($\alpha^{(\phi^-)}$: `r survival_params %>% filter(Parameter == 'Intercept', group == 'Uninfected adults', Site == 'Subalpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'Intercept', group == 'Uninfected adults', Site == 'Subalpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'Intercept', group == 'Uninfected adults', Site == 'Subalpine') %>% select(hi) %>% df2num`)) (Figure \ref{abundance-survival-time-series}B).
+
+```{r load-intro-survival}
+intro_survival <- read_csv('out/intro-survival.csv') %>% 
+  select(-group) %>%
+  group_by(site) %>%
+  mutate(year = year(date), 
+         min_year = min(year),
+         is_min_year = year == min_year) %>%
+  arrange(date) %>%
+  ungroup
+```
+
+Introduced adults survived longer on average at Alpine compared to Subalpine (Figure \ref{introduced-adult-survival}). 
+At the end of the summer following the initial introduction of adults at Alpine, the proportion of adults surviving was `r intro_survival %>% filter(site == 'Alpine', is_overwinter == TRUE, is_min_year == TRUE) %>% select(med) %>% df2num` (`r intro_survival %>% filter(site == 'Alpine', is_overwinter == TRUE, is_min_year == TRUE) %>% select(lo) %>% df2num`, `r intro_survival %>% filter(site == 'Alpine', is_overwinter == TRUE, is_min_year == TRUE) %>% select(hi) %>% df2num`). 
+At Subalpine, only about half (`r intro_survival %>% filter(site == 'Subalpine', is_overwinter == TRUE, is_min_year == TRUE) %>% select(med) %>% df2num` (`r intro_survival %>% filter(site == 'Subalpine', is_overwinter == TRUE, is_min_year == TRUE) %>% select(lo) %>% df2num`, `r intro_survival %>% filter(site == 'Subalpine', is_overwinter == TRUE, is_min_year == TRUE) %>% select(hi) %>% df2num`)) of adults survived to the end of the first summer following initial introduction.
+In the year after the initial introduction, the estimated proportion of introduced adults surviving at Alpine was `r intro_survival %>% filter(site == 'Alpine', year == min_year + 1) %>% filter(date == min(date)) %>% select(med) %>% df2num` (`r intro_survival %>% filter(site == 'Alpine', year == min_year + 1) %>% filter(date == min(date)) %>% select(lo) %>% df2num`, `r intro_survival %>% filter(site == 'Alpine', year == min_year + 1) %>% filter(date == min(date)) %>% select(hi) %>% df2num`), and at Subalpine just `r intro_survival %>% filter(site == 'Subalpine', year == min_year + 1) %>% filter(date == min(date)) %>% select(med) %>% df2num` (`r intro_survival %>% filter(site == 'Subalpine', year == min_year + 1) %>% filter(date == min(date)) %>% select(lo) %>% df2num`, `r intro_survival %>% filter(site == 'Subalpine', year == min_year + 1) %>% filter(date == min(date)) %>% select(hi) %>% df2num`). 
+Similar differences in survival were evident following subsequent introductions, with low within-summer and among-year survival at Subalpine, and a higher survival rate at Alpine (Figure \ref{introduced-adult-survival}). 
+
+Little to no recruitment was observed during the 3-4 years following the initial introductions, consistent with the multi-year larval and juvenile stages in this species (``recruitment'' is the addition of new adults to the population). However, Alpine experienced large recruitment pulses in 2013, 2014, and 2016 (Figure \ref{recruitment-time-series}). 
+The Subalpine population had smaller pulses of recruitment during the period 4-6 years after the introduction, but little recruitment in subsequent years (Figure \ref{recruitment-time-series}). 
+Recruitment pulses were asynchronous between the two populations, particularly in 2016 when a very large pulse of recruits was observed at Alpine but not Subalpine. 
+
+```{r load-recruitment-pars}
+recruit_pars <- read_csv('out/recruit-pars.csv')
+```
+
+Recruitment dynamics varied as a function of winter severity and Bd load.
+In both populations, winter severity reduced recruitment (at Alpine $\beta^{(\lambda, s)}$: `r recruit_pars %>% filter(Site == 'Alpine', var == 'beta_lambda_wc') %>% select(med) %>% df2num` (`r recruit_pars %>% filter(Site == 'Alpine', var == 'beta_lambda_wc') %>% select(lo) %>% df2num`, `r recruit_pars %>% filter(Site == 'Alpine', var == 'beta_lambda_wc') %>% select(hi) %>% df2num`), at Subalpine $\beta^{(\lambda, s)}$: `r recruit_pars %>% filter(Site == 'Subalpine', var == 'beta_lambda_wc') %>% select(med) %>% df2num` (`r recruit_pars %>% filter(Site == 'Subalpine', var == 'beta_lambda_wc') %>% select(lo) %>% df2num`, `r recruit_pars %>% filter(Site == 'Subalpine', var == 'beta_lambda_wc') %>% select(hi) %>% df2num`)). 
+Recruitment overwinter (before the first primary period of the year) was less likely than recruitment among within-year primary periods at Alpine ($\beta^{(\lambda, w)}$: `r recruit_pars %>% filter(Site == 'Alpine', var == 'beta_lambda_ow') %>% select(med) %>% df2num` (`r recruit_pars %>% filter(Site == 'Alpine', var == 'beta_lambda_ow') %>% select(lo) %>% df2num`, `r recruit_pars %>% filter(Site == 'Alpine', var == 'beta_lambda_ow') %>% select(hi) %>% df2num`)), but more likely at Subalpine ($\beta^{(\lambda, w)}$: `r recruit_pars %>% filter(Site == 'Subalpine', var == 'beta_lambda_ow') %>% select(med) %>% df2num` (`r recruit_pars %>% filter(Site == 'Subalpine', var == 'beta_lambda_ow') %>% select(lo) %>% df2num`, `r recruit_pars %>% filter(Site == 'Subalpine', var == 'beta_lambda_ow') %>% select(hi) %>% df2num`)). 
+Conditional on entering the population, adults at Alpine were more likely to recruit into the infected class when mean Bd loads were high ($\beta^{(\gamma, \mu)}$: `r recruit_pars %>% filter(Site == 'Alpine', var == 'beta_g') %>% select(med) %>% df2num` (`r recruit_pars %>% filter(Site == 'Alpine', var == 'beta_g') %>% select(lo) %>% df2num`, `r recruit_pars %>% filter(Site == 'Alpine', var == 'beta_g') %>% select(hi) %>% df2num`)), but mean Bd load was not associated with the probability of recruiting as infected at Subalpine ($\beta^{(\gamma, \mu)}$: `r recruit_pars %>% filter(Site == 'Subalpine', var == 'beta_g') %>% select(med) %>% df2num` (`r recruit_pars %>% filter(Site == 'Subalpine', var == 'beta_g') %>% select(lo) %>% df2num`, `r recruit_pars %>% filter(Site == 'Subalpine', var == 'beta_g') %>% select(hi) %>% df2num`)), perhaps due to low recruitment and therefore low power to detect such an effect.
+
+At both sites, transitioning from the uninfected to the infected adult class (gaining infection) was more likely than transitioning from the infected to uninfected class (losing infection) over most of the study period. 
+Among-year variation in transition probabilities was similar at both sites, with 2013 having higher than average loss-of-infection probabilities (Figure \ref{transition-plot}A). 
+This was most likely due to exceptionally low mean Bd loads in 2013: when Bd loads were low, adults were more likely to lose infection at both study sites, and less likely to gain infection in the Subalpine population (Figure \ref{transition-plot}B). 
+
+
+# Discussion
+
+The modeling approach developed here provides a quantitative means to assess how climate and disease affect demographic rates and population dynamics in hard-to-sample host populations. 
+This builds on previous research that incorporated individual-level covariates in mark-recapture models [@pledger2003open; @royle2008modeling; @gimenez2010individual;  @ford2012incorporating], and that evaluated effects of Bd load at the individual level in wild populations [@spitzen2017fragile]. 
+Our approach is unique in part because we treat unobserved infection status and intensity as parameters, rather than using imputation to backfill missing intensity values. 
+Accounting for uncertainty in individual-level infection intensity in a Bayesian framework simplifies uncertainty propagation to key parameters including detection and survival probabilities. 
+This may provide a better understanding of how individual traits relate to demographic processes and population dynamics, especially when effects of disease on detectability lead to biased capture histories.  
+
+Overall, results indicated that the introduction of frogs to Alpine was successful in establishing a large self-sustaining population, but unsuccessful at Subalpine. 
+The success of the introduction effort at Alpine seems to be driven by relatively low Bd loads, high adult survival,  and large  recruitment pulses into the adult population following mild winters. 
+In contrast, the failure of introductions into Subalpine was associated with higher Bd loads, lower adult survival, and smaller, infrequent recruitment pulses. 
+The estimated effect of Bd load on the survival of infected adults was similar in  both populations, but loads on average were higher at Subalpine. 
+Given the negative effect of Bd load on frog survival, the cause of higher loads on frogs at Subalpine is worthy of additional study. 
+In addition, the fact that the effect of Bd load on survival of infected adults was similar in both populations, but loads on average were higher at Subalpine also suggests that the observed introduction outcomes cannot be explained by differences between the two populations in frog tolerance of Bd infection within summer seasons [@raaberg2009decomposing; @wilber2017resistance].
+
+The two study lakes were relatively distant from each other and located in catchments with different environmental characteristics, but despite this Bd loads were temporally correlated across the two sites. 
+The synchrony in expected load is worth further investigation, as it may indicate environmental forcing of disease dynamics, e.g., variation due to temperature [@cohen2017thermal; @phillott2013chytridiomycosis], but see [@knapp2011nowhere], or some form of connectivity among sites, although the latter possibility seems unlikely. 
+Future studies might also seek to better disentangle landscape-wide factors driving synchrony and local factors that drive differences in mean load, particularly in the context of known mechanisms of disease-induced extinction such as non-density dependent transmission [@rachowicz2007quantifying; @orlofske2018experimental], nonamphibian reservoir hosts [@mcmahon2013chytrid], and small equilibrium densities in the presence of disease [@de2005mechanisms]. 
+
+Although between-population differences in Bd load provide a straightforward explanation for the lower survival of infected adults at Subalpine compared to Alpine [@briggs2010enzootic], it is less obvious why uninfected adults also had lower survival at Subalpine.
+Low uninfected survival may result from differences in habitat characteristics and/or the abundance of terrestrial or aquatic predators that prey on adult frogs. 
+For example, in 2013 ten translocated frogs at each site were tracked for several weeks using radio telemetry. 
+At Subalpine, two of these frogs were preyed on by garter snakes (\textit{Thamnophis elegans}, [@jennings1992dependence]) and no evidence of predation was observed at Alpine. 
+
+We found that infected adults were easier to detect than uninfected adults, and at Alpine, infection load increased detection probability among infected individuals. 
+This could relate to infection-related behavior that makes frogs easier to find and/or capture [@johnson2002concept]. 
+For example, some amphibians increase feeding activity when infected with Bd [@hess2015salamanders]. 
+If this is the case for \textit{R. sierrae}, we might expect frogs to spend more time around the lake edge, where they would be more conspicuous to observers. 
+Some previous studies have assumed equal detectability among infected and uninfected frogs [@briggs2010enzootic; @stegen2017drivers], while others have not [@retallick2004endemic; @murray2009impact; @phillott2013chytridiomycosis]. 
+Our results indicate that even accounting for unequal detectability between uninfected and infected animals may not be sufficient, because Bd load may further affect detectability among infected individuals.
+Future studies should evaluate conditions under which disease impacts on detectability could bias estimates of demographic rates in wild populations. 
+
+The recruitment model developed here may be somewhat simplistic in its focus on adults. 
+In reality, recruitment into the adult population is a function of dynamics in the subadult and larval populations.
+In particular, in mountain yellow-legged frogs and many other frog species Bd infection imposes heavy mortality during metamorphosis, but disease effects on larval stages are relatively weak [@rachowicz2004transmission; @rachowicz2006emerging]. 
+Therefore, to fully understand how factors such as winter severity and disease influence population dynamics by way of affecting larvae, subadults, and adults, future efforts might focus on incorporating elements of integral projection models [@wilber2016integral] and integrated population models [@schaub2011integrated] with hidden Markov models similar to those we developed in this study.
+A joint model for larval, subadult, and adult population dynamics would be better able to account for time lags resulting from the 1-4 year larval development period of this species [@Vredenburg2005mountain]. 
+For example, one severe winter could have long-lasting effects if it slows the development of larvae so that they develop in three rather than two years, but this effect might not be detectable as a signal for adult recruitment until four years after the severe winter, depending on the growth rate of subadult frogs.
+
+Our results provide important insights into causes of population establishment or likely failure for the endangered \textit{R. sierrae}. 
+The two study populations showed very different patterns of adult survival and recruitment, and in particular, within a population the estimated survival of introduced cohorts was remarkably consistent across all introductions. 
+Although the generality of results obtained from these two populations need to be assessed using data from mark-recapture efforts at other reintroduced populations, the results suggest that the estimated survival of reintroduced frogs could provide an early indication of the site-specific probability of introduction success. 
+In addition, in the future, when survival estimates of reintroduced frogs are available from a larger number of populations, these estimates could eventually allow the identification of site characteristics associated with likely introduction success or failure. 
+This predictive ability would greatly increase the effectiveness of mountain yellow-legged frog recovery efforts. 
+
+# Acknowledgments
+
+
+We thank the following people and institutions for important contributions to this study: numerous people who assisted with the field work (especially N. Kauffman, A. Killion, A. Lindauer, J. Maurer, and S. Ostoja); R. Chen, K. Rose, and M. Toothman for qPCR assistance; C. Briggs and M. Wilber for reviewing an earlier draft of the manuscript; and Yosemite National Park (R. Grasso, H. McKenny, and S. Thompson), U.S. Geological Survey - Western Ecological Research Center (M. Brooks and S. Ostoja), and  the University of California Natural Reserve System - Sierra Nevada Aquatic Research Laboratory (DOI: 10.21973/N3966F) for logistical support and valuable discussions. 
+Research permits were provided by Yosemite National Park, U.S. Fish and Wildlife Service, and the Institutional Animal Care and Use Committee at the University of California, Santa Barbara. 
+This project was funded by grants from the National Park Service (to R.A.K), Yosemite Conservancy (to Yosemite National Park and R.A.K.), U.S. Geological Survey (Ecosystems Mission Area - Natural Resource Preservation Program, to M. Brooks and R. Knapp for the project titled ``Factors influencing reintroduction success of the endangered mountain yellow-legged frog'', and National Science Foundation (DEB-1557190, to C. Briggs and R. Knapp).
+We also thank H. Ito for translating mark-recapture model specifications from JAGS to Stan, as this greatly simplified our implementation. 
+
+\bigskip \noindent
+
+#### Author contributions
+
+R.A.K. designed and performed the research; R.A.K. assembled and maintained the study data set; M.B.J. and R.A.K. developed the models, M.B.J. analyzed the data; M.B.J. and R.A.K. wrote the paper.
+
+
+# Literature cited
+
+<div id="refs"></div>
+
+
+\newpage
+
+# Tables
+
+\begin{table}[h!]
+  \captionsetup{singlelinecheck = false, format= hang, justification=raggedright, labelsep=space}
+	\caption{Schedule of frog introductions to the study lakes.}
+        \label{tab:table1}
+        \begin{tabular}{c c c}
+		\hline
+    		\text{Lake} & \text{Year} & \text{Number of frogs}\\
+  		    \hline
+  			Alpine & 2006 & 40\\
+    		. & 2013 & 20\\
+   			Subalpine & 2008 & 36\\
+  			. & 2013 & 19\\
+			. & 2015 & 20\\
+			. & 2017 & 30\\
+   		\hline
+		\end{tabular}
+\end{table}
+
+\newpage
+
+# Figure legends
+
+### Figure \ref{hmm-structure}
+
+Summary of hidden Markov model structure. On the first primary period $t=1$, we assume that all individuals $i=1, ..., M$ are in the not-recruited class. 
+The second primary period represents the first introduction. 
+In this example, two surveys $j = 1, 2$ are conducted on the third primary period. 
+The fourth primary period is a dummy period, inserted to increase the regularity of time intervals between primary periods, and has no associated surveys.
+
+### Figure \ref{detection-effects}
+
+A. Estimated detection probabilities as a function of survey air temperature for Bd-infected and uninfected adults. 
+The  ribbons represent the 90\% posterior credible interval, and the line represents the posterior median. 
+Predictions for Bd infected adults correspond to individuals with average infection loads at each site. 
+B. Parameter estimates for the detection model. Each of the detection parameters are shown on the y-axis. Color indicates population.
+
+### Figure \ref{mean-bd-loads}
+
+\textit{Batrachochytrium dendrobatidis} (Bd) infection loads over time. 
+Observed load values from skin swabs are shown as points on a log10 scale, colored by site. 
+The estimated average Bd infection load is shown as a line (posterior median) with a 90\% credible interval ribbon.
+
+### Figure \ref{abundance-survival-time-series}
+
+Estimated abundance (A) and survival (B) time series for infected and uninfected adults at both populations. 
+Time is shown on the x-axis, with facets for years. 
+Posterior medians for each primary period are shown as points connected by line segments, and the 90\% credible interval is shown as a shaded ribbon. 
+In A, the vertical dashed lines indicate introduction events, and the number of adults added in each event is indicated with a “+” symbol. Also note the difference in the y-axis scales between the two sites.
+
+### Figure \ref{bd-load-survival}
+
+Estimated survival probabilities for within-summer and overwinter transitions among infected adults as a function of Bd infection load. 
+The x-axis shows Bd load over the range of observed values. 
+The y-axis represents survival probabilities. 
+Posterior medians are lines and 90\% credible intervals are ribbons.
+
+### Figure \ref{introduced-adult-survival}
+
+Estimated survival of introduced adults at both populations, colored by introduction event. 
+Time is shown on the x-axis, with the proportion of adults surviving on the y-axis. 
+The number of individuals introduced in each introduction event is labeled as (n=...). 
+The ribbons represent the 90\% posterior credible interval, with the midline representing the posterior median.
+
+### Figure \ref{recruitment-time-series}
+
+Estimated cumulative number of natural recruits into the adult population at both sites over time (on a log10 scale).
+The ribbons represent the 90\% posterior credible interval, with the midline representing the posterior median. 
+Dots connected by lines represent primary periods.
+
+### Figure \ref{transition-plot}
+
+A. Estimated transition probabilities between the uninfected and infected adult classes at both sites in each year. 
+Ribbons represent the 90\% posterior credible interval, with the midline representing the posterior median. 
+Dots connected by lines represent years. 
+B. Estimated transition probabilities from the uninfected adult class to the infected adult class and vice versa as a function of expected Bd load among infected adults. 
+The line represents the posterior median, and the ribbons indicate the 95\% credible interval, with colors differentiating study sites.
+
+\newpage
+
+# Figures
+
+\begin{figure}[ht] 
+\caption{}
+\includegraphics[width=\textwidth]{fig/hmm-structure.pdf}
+\label{hmm-structure} 
+\end{figure}
+\newpage
+
+\begin{figure}[ht] 
+\caption{}
+\includegraphics[width=\textwidth]{fig/detection-effects.pdf}
+\label{detection-effects}
+\end{figure}
+\newpage
+
+\begin{figure}[ht] 
+\caption{}
+\includegraphics[width=\textwidth]{fig/mean-bd-loads.pdf}
+\label{mean-bd-loads}
+\end{figure}
+\newpage
+
+\begin{figure}[ht] 
+\caption{}
+\includegraphics[width=.95\textwidth]{fig/abundance-survival-time-series.pdf}
+\label{abundance-survival-time-series}
+\end{figure}
+\newpage
+
+\begin{figure}[ht] 
+\caption{}
+\includegraphics[width=\textwidth]{fig/bd-load-survival.pdf}
+\label{bd-load-survival}
+\end{figure}
+\newpage
+
+\begin{figure}[ht] 
+\caption{}
+\includegraphics[width=\textwidth]{fig/introduced-adult-survival.pdf}
+\label{introduced-adult-survival}
+\end{figure}
+\newpage
+
+\begin{figure}[ht]
+\caption{}
+\includegraphics[width=\textwidth]{fig/recruitment-time-series.pdf}
+\label{recruitment-time-series}
+\end{figure}
+\newpage
+
+\begin{figure}[ht] 
+\caption{}
+\includegraphics[width=\textwidth]{fig/transition-plot.pdf}
+\label{transition-plot} 
+\end{figure}
+\newpage
+
+
+# Appendices
+
+\subsection*{Appendix A: Joint distribution factorization}
+\label{joint-distribution}
+
+For completeness, we specify the factorization of the joint distribution of data and parameters (the unnormalized posterior density) below. 
+We represent all unknowns specific to the detection model as a vector $\theta^{(p)} = (\alpha^{(p)}, \beta^{(p, x)}, \beta^{(p, +)}, \beta^{(p, z)})$, parameters specific to the probability of entry model as a vector $\theta^{(\lambda)}$, to the probability of recruiting into the infected adult class given that an individual has entered the population as $\theta^{(\gamma)}$, to uninfected survival as $\theta^{(\phi^-)}$, and to the infected survival model component as $\theta^{(\phi^+)}$. 
+Concatenating these two vectors gives a vector that contains all unique survival model parameters: $\theta^{(\phi)} = (\theta^{(\phi^-)}, \theta^{(\phi^+)})$.
+Last, we represent parameters unique to transitions from the infected to uninfected class as $\theta^{(\eta^-)}$, and from the uninfected to infected class as $\theta^{(\eta^+)}$, with both concatenated as $\theta^{(\eta)} = (\theta^{(\eta^-)}, \theta^{(\eta^+)})$.
+The resulting joint distribution is:
+
+\begin{align*}
+\overbrace{\prod_{i = 1}^M [u_{i, 1:n_t}, o_{i, 1:n_j} | \theta^{(\lambda)}, \theta^{(\gamma)}, \theta^{(\phi)}, \theta^{(\eta)}, \theta^{(p)}, z_{i, 1:n_t}]}^{\text{Hidden states and observations}} \times \\
+\overbrace{ [\matr{Z} | \mu, \sigma][\mu | \alpha^{(\mu)}, \beta^{(\mu)}, \sigma^{(\mu)}] [\alpha^{(\mu)}] [\beta^{(\mu)}] [\sigma^{(\mu)}] [\sigma]}^{\text{Bd model}} \times \\
+\overbrace{ [\alpha^{(\lambda)}] [\beta^{(\lambda, w)}] [\beta^{(\lambda, s)}] [\beta^{(\lambda, 1)}] \prod_{y = 1}^{n_y}[\epsilon^{(\lambda)}_y | \sigma^{(\lambda)}] [\sigma^{(\lambda)}] }^{\text{Prior distributions}} \times \\
+[\alpha^{(\gamma)}] [\beta^{(\gamma, \mu)}] \prod_{y = 1}^{n_y}[\epsilon^{(\gamma)}_y | \sigma^{(\gamma)}] [\sigma^{(\gamma)}] \times \\
+[\alpha^{(\phi^-)}] [\beta^{(\phi^-, w)}] [\beta^{(\phi^-, s)}] \prod_{y = 1}^{n_y}[\epsilon^{(\phi^-)}_y | \sigma^{(\phi^-)}] [\sigma^{(\phi^-)}] \times \\
+[\alpha^{(\phi^+)}] [\beta^{(\phi^+, w)}] [\beta^{(\phi^+, s)}] [\beta^{(\phi^+, z)}] \prod_{y = 1}^{n_y}[\epsilon^{(\phi^+)}_y | \sigma^{(\phi^+)}] [\sigma^{(\phi^+)}] \times \\
+[\alpha^{(\eta^-)}] [\beta^{(\eta^-, \mu)}] \prod_{y = 1}^{n_y}[\epsilon^{(\eta^-)}_y | \sigma^{(\eta^-)}] [\sigma^{(\eta^-)}] \times \\
+[\alpha^{(\eta^+)}] [\beta^{(\eta^+, \mu)}] \prod_{y = 1}^{n_y}[\epsilon^{(\eta^+)}_y | \sigma^{(\eta^+)}] [\sigma^{(\eta^+)}] \times \\
+[\alpha^{(p)}] [\beta^{(p, x)}] [\beta^{(p, +)}] [\beta^{(p, z)}][\delta].
+\end{align*}
+
+
+\subsection*{Appendix B: Forward algorithm description}
+\label{forward-algorithm}
+
+
+Parameter estimation for this model is made somewhat difficult by the presence of discrete parameters (hidden states).
+We address this issue by using the forward algorithm, which does not require sampling from the discrete state space, to compute the joint probability of hidden states and observations [@zucchini2016hidden].
+To describe this algorithm, we first consider the case of one individual. 
+We would like to compute $[u_{i, 1:n_t}, o_{i, 1:n_j} | ...]$ (suppressing dependence on detection and transition parameters for compactness) for the individual with state and capture history shown in Figure \ref{hmm-structure}.  
+We can factor this joint probability as follows: 
+
+$$[u_{i, 1:n_t}, o_{i, 1:n_j}] = [u_{i, 1}] [u_{i, 2} | u_{i, 1}] [u_{i, 3} | u_{i, 2}] [o_{i, j = 1} | u_{i, 3}] [o_{i, j = 2} | u_{i, 3}] [u_{i, 4} | u_{i, 3}] ... [u_{i, n_t} | u_{i, n_t - 1}] [o_{i, n_j} | u_{i, n_t}].$$
+
+\noindent If all of the unknown states were known, this would be as simple as extracting the relevant probabilities from $\matr{\Psi}_{i, t}$ and $\matr{\Omega}_{i, j}$.
+Assuming that all individuals in the first primary period are in the ``not recruited'' class ($u_{i, 1} = 1 \, \forall i$) implies that $[u_{i, 1}] = (1 \, 0 \, 0 \, 0)$, where each element in the row vector represents the probability of being in hidden state 1, 2, 3, and 4, respectively.
+If we define: $\matr{P} (o_{i, j}) = \text{diag}(\matr{\Omega}_{., i, j, o_{i, j}})$ to be the square matrix acquired by placing the elements of column $o_{i, j}$ from $\matr{\Omega}_{i, j}$ along the diagonal (with zeros elsewhere), the forward algorithm provides the joint distribution of hidden states and observations as follows: 
+
+$$[u_{i, 1:n_t}, o_{i, 1:n_j}] = [u_{i, t=1}] \matr{\Psi}_{i, t=1} \matr{\Psi}_{i, t=2} \matr{P} (o_{i, j = 1}) \matr{P} (o_{i, j = 2}) \matr{\Psi}_{i, t=2} ... \matr{\Psi}_{i, t=n_t - 1}\matr{P} (o_{i, j = n_j}) \matr{1}'$$
+
+\noindent where $\matr{1}'$ is a column vector of ones. 
+More generally, we can compute this probability by defining $\matr{B}_{i, t} = \matr{\Psi}_{i, t - 1} \prod_{j \sim t} \matr{P} (o_{i, j})$, where $j \sim t$ indicates surveys that took place in primary period $t$ (if no surveys took place, then $\matr{B}_{i, t} = \matr{\Psi}_{i, t - 1}$).
+Then bringing back dependence on all other detection and transition parameters into our notation, we can compute the joint probability of hidden states and the observation history compactly as: 
+
+$$[u_{i, 1:n_t}, o_{i, 1:n_j} | \theta^{(\lambda)}, \theta^{(\gamma)}, \theta^{(\phi)}, \theta^{(\eta)}, \theta^{(p)}, z_{i, 1:n_t}] = [u_{i, t=1}] \prod_{t  = 2}^{n_t}\matr{B}_{i, t} \matr{1}'.$$

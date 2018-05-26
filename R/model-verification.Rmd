@@ -1,0 +1,616 @@
+---
+title: "Mark-recapture model verification"
+author: "Maxwell B. Joseph and Roland A. Knapp"
+date: "4/10/2018"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Simulating data with known parameters with the goal of evaluating parameter recovery. 
+
+```{r load-deps, message=FALSE}
+library(tidyverse)
+library(reshape2)
+library(assertthat)
+library(rstan)
+set.seed(1234)
+```
+
+## Generating sampling design quantities
+
+First, we will determing the number of primary periods $T$, and the snow water content for each primary period, which will be used as a covariate. 
+
+```{r make-primary-periods}
+# fixed data
+T <- 40 # number of primary periods
+Tm1 <- T - 1
+K <- 15 # number of years
+year <- round(seq(1, K, length.out = T))
+is_overwinter <- c(diff(year), 0)
+
+# covariate value (snow water content) for primary periods
+x <- rnorm(K) # yearly values
+x_t <- x[year] # values by primary period
+x_tm1 <- c(rnorm(1), x_t[1:T-1])
+
+```
+
+Next, we will determine the number of secondary periods (surveys) that take place for each primary period. 
+By design, there are no surveys for the first primary period. 
+
+```{r make-secondary-periods}
+# rpois() allows for primary periods with 0 secondary periods
+# essentially a missed, unsurveyed primary period
+J <- c(0, rpois(T - 1, lambda = 4))
+Jtot <- sum(J)
+
+# create a vector of indices for each secondary period
+jvec <- c()
+for (i in seq_along(J)) {
+  if (J[i] > 0) {
+    jvec <- c(jvec, 1:J[i])
+  }
+}
+
+stopifnot(length(jvec) == Jtot)
+```
+
+Now, we determine the total number of adults that are introduced, the total number of individuals ever to have existed $M$, and determine when each introduced animal enters the population. 
+
+```{r specify-introduced-adults}
+n_intro <- 20
+M <- n_intro + 380 # augmented num indiv
+introduced <- c(rep(TRUE, n_intro), rep(FALSE, M - n_intro))
+
+
+# determine which primary period each individual was introduced
+# must be 2 or more, because the 1st primary period is make-believe
+t_intro <- sample(2:Tm1, size = n_intro, replace = TRUE) %>%
+  sort %>%
+  c(rep(0, M - n_intro))
+```
+
+## Bd load data
+
+Next, we will determine the average log Bd load among infected adults for each primary period, which is modeled as a normally distributed random variable whose mean is a linear function of snow water content. 
+
+```{r specify-mean-load}
+# determine average intensity for infected individuals at each
+# primary period
+alpha_z <- 0
+beta_z <- 1
+sigma_z <- .5
+mu_z <- rnorm(n = K, mean = alpha_z + beta_z * x, sd = sigma_z)
+```
+
+Using these average values, we can determine the potential log loads for each adult at each primary period, conditional on infection. 
+
+```{r specify-potential-load}
+# individual variation around mean load
+sigma_bd_indiv <- .2
+
+potential_log_load <- matrix(nrow = M, ncol = T)
+
+# load conditional on being infected
+for (i in 1:T) {
+  potential_log_load[, i] <- rnorm(n = M, mean = mu_z[year[i]], sd = sigma_bd_indiv)
+}
+```
+
+## Detection quantities
+
+Next, we need to determine survey-level covariates (e.g., air temperature) and use these to generate a detection design matrix. 
+
+```{r}
+n_p <- 2 # number of columns in detection design matrix
+assert_that(n_p >= 2)
+
+X_p <- cbind(rep(1, Jtot), 
+             matrix(rnorm(Jtot * (n_p - 1)), ncol = n_p - 1))
+```
+
+## Parameter generation
+
+Next, specify the remaining true parameter values:
+
+```{r}
+# recruitment parameters
+alpha_lambda <- -4
+beta0_lambda <- 0
+beta_lambda_ow <- rnorm(1)
+beta_lambda_wc <- rnorm(1)
+sigma_lambda <- 1.2
+eps_lambda <- rnorm(K, 0, sigma_lambda)
+
+# survival parameters: uninfected adults
+alpha_phi_uninfected <- 3
+beta_phi_ow <- rnorm(1)
+beta_phi_wc <- rnorm(1)
+sigma_phi_uninf <- abs(rnorm(1))
+eps_phi_uninf <- rnorm(K, 0, sigma_phi_uninf)
+
+# survival parameters: infected adults
+alpha_phi_infected <- 2.5
+beta_phi_inf_wc <- rnorm(1)
+beta_phi_infected <- rnorm(1)
+beta_phi_inf_ow <- rnorm(1)
+sigma_phi_inf <- abs(rnorm(1))
+eps_phi_inf <- rnorm(K, 0, sigma_phi_inf)
+
+# loss of infection
+alpha_eta1 <- rnorm(1)
+beta_eta1 <- rnorm(1)
+sigma_eta1 <- abs(rnorm(1))
+eps_eta1 <- rnorm(K, 0, sigma_eta1)
+
+# gain of infection
+alpha_eta2 <- rnorm(1)
+beta_eta2 <- abs(rnorm(1))
+sigma_eta2 <- abs(rnorm(1))
+eps_eta2 <- rnorm(K, 0, sigma_eta2)
+
+# conditional probability of being infected, given recruitment
+alpha_g <- rnorm(1)
+beta_g <- rnorm(1)
+sigma_g <- abs(rnorm(1))
+eps_g <- rnorm(K, 0, sigma_g)
+
+# detection parameters
+beta_p <- c(0, rnorm(n_p - 1))
+beta_p_infected <- rnorm(1)
+beta_p_bd <- rnorm(1)
+
+# probability that a swab succeeds
+delta <- .9
+```
+
+
+## Specifying transition probabilities
+
+We'll begin specifying transition matrices with survival probabilities:
+
+```{r}
+phi_infected <- array(dim = c(M, T))
+phi_uninfected <- array(dim = c(M, T))
+for (t in 1:T) {
+  phi_uninfected[, t] <- plogis(alpha_phi_uninfected +
+                                beta_phi_ow * is_overwinter[t] +
+                                beta_phi_wc * x_t[t] +
+                                eps_phi_uninf[year[t]])
+
+  phi_infected[, t] <- plogis(alpha_phi_infected + 
+                              beta_phi_infected * potential_log_load[i, t] + 
+                              beta_phi_inf_ow * is_overwinter[t] + 
+                              beta_phi_inf_wc * x_t[t] + 
+                              eps_phi_inf[year[t]])
+}
+```
+
+Then, probabilities of entering the population:
+
+```{r}
+lambda <- alpha_lambda + 
+          beta_lambda_ow * is_overwinter[1:Tm1] + 
+          beta_lambda_wc * x_t[1:Tm1] + 
+          eps_lambda[year[1:Tm1]]
+lambda[1] <- lambda[1] + beta0_lambda
+lambda <- plogis(lambda)
+```
+
+Probability of recruiting as infected, given entry:
+
+```{r}
+g <- plogis(alpha_g + 
+            beta_g * mu_z[year[1:Tm1]] + 
+            eps_g[year[1:Tm1]])
+
+gamma <- matrix(nrow = 2, ncol = Tm1)
+gamma[1, ] <- lambda * (1 - g)   # recruit, not infected
+gamma[2, ] <- lambda * g         # recruit, infected
+```
+
+Loss and gain of infection:
+
+```{r}
+# loss of infection
+eta1 <- plogis(alpha_eta1 + 
+               beta_eta1 * mu_z[year[1:Tm1]] + 
+               #beta_eta1_ow * is_overwinter[1:Tm1] + 
+               eps_eta1[year[1:Tm1]])
+
+# gain of infection
+eta2 <- plogis(alpha_eta2 +
+               beta_eta2 * mu_z[year[1:Tm1]] + 
+               #beta_eta2_ow * is_overwinter[1:Tm1] + 
+               eps_eta2[year[1:Tm1]])
+```
+
+Now, we can use these quantities to generate transition matrices. 
+We will store these in an array `ps` with dimensions corresponding to starting states, individuals, primary periods, and destination states. 
+
+```{r}
+ps <- array(dim = c(4, M, Tm1, 4))
+for (i in 1:M) {
+  # fill in shared values
+  for (t in 1:Tm1) {
+    ps[1, i, t, 4] <- 0                                      # can't die before being alive
+    ps[2, i, t, 1] <- 0                                      # can't unenter population
+    ps[3, i, t, 1] <- 0
+    ps[2, i, t, 2] <- phi_uninfected[i, t] * (1 - eta2[t])   # survive/didn't get infected
+    ps[2, i, t, 3] <- phi_uninfected[i, t] * eta2[t]         # survived/became infected
+    ps[2, i, t, 4] <- 1 - phi_uninfected[i, t]               # death
+    ps[3, i, t, 2] <- phi_infected[i, t] * eta1[t]           # survived, lost infection
+    ps[3, i, t, 3] <- phi_infected[i, t] * (1 - eta1[t])     # survived, didn't lose infection
+    ps[3, i, t, 4] <- 1 - phi_infected[i, t]                 # death
+    ps[4, i, t, 1] <- 0                                      # can't unenter after death
+    ps[4, i, t, 2] <- 0                                      # can't un-die
+    ps[4, i, t, 3] <- 0
+    ps[4, i, t, 4] <- 1                                      # once dead, always dead
+  }
+  
+  if (introduced[i]) {
+    # zero probability of recruiting through t_intro - 2
+    for (t in 1:(t_intro[i] - 2)) {
+      ps[1, i, t, 1] <- 1
+      ps[1, i, t, 2] <- 0
+      ps[1, i, t, 3] <- 0
+    }
+    # timestep before introduction has Pr(recruiting) = 1
+    # NOTE: this assumes introduced animals are infected upon introduction
+    ps[1, i, t_intro[i] - 1, 1] <- 0
+    ps[1, i, t_intro[i] - 1, 2] <- 0
+    ps[1, i, t_intro[i] - 1, 3] <- 1
+    # to avoid NA values, fill in remaining recruitment probs (though they
+    # are irrelevant for the likelihood)
+    for (t in t_intro[i]:Tm1) {
+      ps[1, i, t, 1] <- 1 - gamma[1, t] - gamma[2, t]
+      ps[1, i, t, 2] <- gamma[1, t]
+      ps[1, i, t, 3] <- gamma[2, t]
+    }
+  } else {
+    # they have not been introduced, so they must recruit naturally
+    for (t in 1:Tm1) {
+      ps[1, i, t, 1] <- 1 - gamma[1, t] - gamma[2, t]
+      ps[1, i, t, 2] <- gamma[1, t]
+      ps[1, i, t, 3] <- gamma[2, t]
+    }
+  }
+}
+
+# verify no NA values in transition probabilities
+assert_that(!any(is.na(ps)))
+
+# verify that all transition matrices are simplexes
+for (i in 1:M) {
+  for (t in 1:Tm1) {
+    # rows must sum to one
+    assert_that(all(abs(rowSums(ps[, i, t, ]) - 1) < 1e16))
+  }
+}
+```
+
+## Simulating true states
+
+Now that we have the transition probabilities, we can simulate the actual states. 
+
+```{r}
+# Simulating true states --------------------------------------------------
+z <- array(dim = c(M, T))
+load <- matrix(nrow = M, ncol = T)
+
+z[, 1] <- 1               # all animals are assumed to be in state 1 initially
+for (i in 1:M) {
+  for (t in 2:T) {
+    z[i, t] <- which.max(rmultinom(1,
+                                   size = 1,
+                                   prob = ps[z[i, t - 1], i, t - 1, ]))
+    if (z[i, t] == 3) {
+      load[i, t] <- exp(potential_log_load[i, t])
+    }
+    if (z[i, t] == 2) {
+      load[i, t] <- 0
+    }
+
+  }
+}
+
+rownames(z) <- paste0('individual_', 1:M)
+colnames(z) <- paste0('primary_period_', 1:T)
+
+rownames(load) <- rownames(z)
+colnames(load) <- colnames(z)
+
+# assert no missing values
+assert_that(!any(is.na(z)))
+
+# confirm that some of these individuals never existed (there are pseudo-individuals)
+pseudoindividuals <- rowSums(z) == T
+assert_that(any(pseudoindividuals))
+```
+
+Now, let's visualize the states. 
+
+```{r}
+z %>%
+  as.data.frame %>%
+  tbl_df %>%
+  rownames_to_column %>%
+  gather(primary_period, state, -rowname) %>%
+  mutate(primary_period = parse_number(primary_period), 
+         individual = parse_number(rowname), 
+         introduced = introduced[individual]) %>%
+  group_by(individual) %>%
+  mutate(first_recruited = primary_period[state > 1][1]) %>%
+  ungroup %>%
+  mutate(state = case_when(
+    .$state == 1 ~ 'Not recruited', 
+    .$state == 2 ~ 'Uninfected', 
+    .$state == 3 ~ 'Infected', 
+    .$state == 4 ~ 'Dead'
+  )) %>%
+  ggplot(aes(x = primary_period, 
+             y = reorder(factor(individual), first_recruited), 
+             fill = state)) + 
+  geom_tile() + 
+  scale_fill_manual(values = c('black', 'red2', 'lightgrey', 'dodgerblue')) + 
+  theme(axis.text.y = element_blank(), 
+        axis.title.y = element_blank())
+```
+
+## Simulating observations
+
+Now that we have the states, we can simulate observations. 
+
+```{r}
+po <- array(0, dim = c(4, M, Jtot, 4))
+prim_idx <- rep(1:T, J)
+
+logit_p <- X_p %*% beta_p
+
+for (i in 1:M) {
+  for (j in 1:Jtot) {
+    p_uninf <- plogis(logit_p[j])
+    p_inf <- plogis(logit_p[j] + 
+                      beta_p_infected + 
+                      beta_p_bd * potential_log_load[i, prim_idx[j]])
+  
+    po[1, i, j, 1] <- 1
+    po[1, i, j, 2] <- 0
+    po[1, i, j, 3] <- 0
+    po[1, i, j, 4] <- 0
+
+    po[2, i, j, 1] <- 1 - p_uninf
+    po[2, i, j, 2] <- p_uninf * delta
+    po[2, i, j, 3] <- 0
+    po[2, i, j, 4] <- p_uninf * (1 - delta)
+
+    po[3, i, j, 1] <- 1 - p_inf
+    po[3, i, j, 2] <- 0
+    po[3, i, j, 3] <- p_inf * delta
+    po[3, i, j, 4] <- p_inf * (1 - delta)
+
+    po[4, i, j, 1] <- 1
+    po[4, i, j, 2] <- 0
+    po[4, i, j, 3] <- 0
+    po[4, i, j, 4] <- 0
+    assert_that(all(abs(rowSums(po[, i, j, ]) - 1) < 1e12))
+  }
+}
+```
+
+Given the true states and the observation matrices, simulate observations:
+
+```{r}
+# simulate detection data
+y_prim <- rep(1:T, J)
+y <- array(dim = c(M, Jtot))
+for (i in 1:M) {
+  for (j in 1:Jtot) {
+    y[i, j] <- which.max(rmultinom(1, 1, po[z[i, y_prim[j]], i, j, ]))
+  }
+}
+
+# create a survey number data frame to ensure each primary period is represented
+# in the observation array Y, even if there were no surveys, simplifying indexing
+survey_number_df <- tibble(primary_period = 1:T) %>%
+  mutate(secondary_idx = 1, individual = 1)
+
+y_df <- melt(y,
+             varnames = c('individual', 'secondary_period'),
+             value.name = 'y') %>%
+  tbl_df %>%
+  mutate(primary_period = y_prim[secondary_period],
+         secondary_idx = jvec[secondary_period]) %>%
+  dplyr::select(individual, primary_period, secondary_idx, y) %>%
+  full_join(survey_number_df)
+
+Y <- acast(y_df, individual ~ primary_period ~ secondary_idx, fill = 0,
+           value.var = "y")
+
+# check dimension match for Y
+assert_that(dim(Y)[3] == max(J))
+```
+
+In addition to the observations, we need to have indices for the order of surveys:
+
+```{r}
+p_df <- tibble(primary_period = rep(1:T, J),
+               secondary_idx = jvec) %>%
+  mutate(j_idx = 1:n())
+
+
+j_idx <- survey_number_df %>%
+  dplyr::select(primary_period, secondary_idx) %>%
+  full_join(p_df) %>%
+  acast(primary_period ~ secondary_idx,
+        fill = 0,
+        value.var = 'j_idx')
+
+# verify that the primary periods with no surveys have all zeros in j_idx
+assert_that(identical(names(which(rowSums(j_idx) == 0)),
+            which(J == 0) %>% as.character))
+```
+
+Now that we have the actual observations, we can determine which swabs would have been collected to get a swab dataset. 
+
+```{r}
+# load_df is an oracle data frame that has all of the infected animal
+# infection intensities
+load_df <- melt(load,
+                varnames = c('individual', 't'),
+                value.name = 'z') %>%
+  as_tibble %>%
+  mutate(t = parse_number(t),
+         individual = parse_number(individual))
+
+# subset y_df to figure out which swabs would have been collected and run
+swab_df <- y_df %>%
+  filter(y == 2 | y == 3) %>%
+  group_by(individual, primary_period) %>%
+  summarize(obs_state = unique(y)) %>%
+  ungroup() %>%
+  rename(t = primary_period) %>%
+  left_join(load_df)
+
+pos_swab_df <- filter(swab_df, z > 0)
+
+pos_swab_df %>%
+  ggplot(aes(t, z)) + 
+  geom_jitter(height = 0, width = .2) + 
+  xlab('Primary period') + 
+  ylab('Observed load')
+```
+
+Having identified all of the positive swabs, we can proceed to create the array of potential log loads:
+
+```{r}
+load_observed <- matrix(0, nrow = M, ncol = T)
+observed_log_load <- matrix(-9999, nrow = M, ncol = T)
+for (i in 1:M) {
+  for (prim_period in 1:T) {
+    swab_subset <- filter(swab_df, individual == i & t == prim_period)
+    if (nrow(swab_subset) > 0) {
+      if (swab_subset$z != 0) {
+        # we are only tracking positive (nonzero) swab values
+        load_observed[i, prim_period] <- 1
+        observed_log_load[i, prim_period] <- log(swab_subset$z)
+      }
+    }
+  }
+}
+```
+
+Finally, we can bundle the data to use in our Stan model: 
+
+```{r}
+stan_d <- list(M = M,
+               T = T,
+               maxJ = max(J),
+               J = J,
+               Jtot = Jtot,
+               Y = Y,
+               introduced = introduced,
+               t_intro = t_intro,
+               X_p = X_p,
+               n_p = ncol(X_p),
+               j_idx = j_idx,
+               any_surveys = ifelse(J > 0, 1, 0),
+               n_swab = nrow(pos_swab_df),
+               t_swab = pos_swab_df$t,
+               log_load = log(pos_swab_df$z),
+               load_observed = load_observed,
+               observed_log_load = observed_log_load,
+               is_overwinter = is_overwinter,
+               prim_idx = rep(1:T, J),
+               x = x,
+               x_t = x_t,
+               x_tm1 = x_tm1,
+               K = K,
+               year = year, 
+               different_detection_prob = 1)
+```
+
+Then, let's run ADVI to estimate parameters. 
+
+```{r}
+m_init <- stan_model('../stan/uncertain-state.stan')
+m_fit <- vb(m_init,
+            data = stan_d,
+            eta = .1, tol_rel_obj = 0.005,
+            init = 0,
+            adapt_engaged = FALSE)
+```
+
+```{r}
+post <- rstan::extract(m_fit)
+
+# check to see whether the 
+hist(post$Nsuper)
+true_Nsuper <- M - sum(pseudoindividuals)
+abline(v = true_Nsuper, col = 2, lty = 2)
+```
+
+Now, let's evaluate the correspondence between the true and estimated abundance. 
+
+```{r}
+par_names <- c('alpha_lambda',
+               'beta0_lambda', 'beta_lambda_ow', 
+               'beta_lambda_wc',  
+               'sigma_lambda',
+               'alpha_phi_uninfected', 'beta_phi_ow', 
+               'beta_phi_wc', 
+               'sigma_phi_uninf', 
+               'alpha_phi_infected', 'beta_phi_inf_wc', 
+               'beta_phi_infected', 
+               'beta_phi_inf_ow', 'sigma_phi_inf',
+               'alpha_eta1', 'beta_eta1',  
+               'sigma_eta1',
+               'alpha_eta2', 'beta_eta2', 
+               'sigma_eta2', 
+               'alpha_g', 'beta_g', 
+               'sigma_g',
+               'beta_p', 'beta_p_infected', 'beta_p_bd', 
+               'delta')
+
+qvals <- c(0.025, .5, 0.975)
+estimates <- lapply(post[par_names], quantile, qvals) %>%
+  bind_rows(.id = 'par')
+estimates$par <- qvals
+estimates <- estimates %>%
+  gather(parameter, value, -par) %>%
+  as_tibble
+estimates$true <- sapply(estimates$parameter, FUN = function(x) eval(parse(text = x))[1]) %>% 
+  unlist
+estimates <- estimates %>%
+  spread(par, value) %>%
+  mutate(family = case_when(
+    grepl('eta1', .$parameter) ~ 'Loss of infection', 
+    grepl('eta2', .$parameter) ~ 'Gain of infection', 
+    grepl('lambda', .$parameter) ~ 'Recruitment',
+    grepl('phi', .$parameter) ~ 'Survival',
+    grepl('_g', .$parameter) ~ 'Conditional infection', 
+    TRUE ~ 'Other'
+  ))
+  
+
+estimates %>%
+  ggplot(aes(x = true, y = `0.5`)) + 
+  geom_point() + 
+  geom_linerange(aes(ymin = `0.025`, ymax = `0.975`)) + 
+  geom_abline(slope = 1, intercept = 0, linetype = 'dashed') + 
+  xlab('True value') + 
+  ylab('Estimate with approximate 90% credible interval') + 
+  facet_wrap(~family)
+```
+
+Last, let's make a table to evaluate parameter recovery for this realization:
+
+```{r}
+estimates %>% 
+  arrange(family) %>%
+  knitr::kable()
+```
