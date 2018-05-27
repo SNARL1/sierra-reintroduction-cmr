@@ -1,5 +1,5 @@
 ---
-title: Disease and climate effects on individuals jointly drive post-reintroduction
+title: Disease and climate effects on individuals drive post-reintroduction
   population dynamics of an endangered amphibian
 bibliography: library.bib
 output:

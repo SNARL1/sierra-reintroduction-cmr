@@ -1,4 +1,4 @@
-# Data from: Disease and climate effects on individuals jointly drive post-reintroduction population dynamics of an endangered amphibian
+# Data from: Disease and climate effects on individuals drive post-reintroduction population dynamics of an endangered amphibian
 
 *Maxwell B. Joseph and Roland A. Knapp*
 
