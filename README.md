@@ -17,9 +17,7 @@ This repo is maintained by Max Joseph (maxwell.b.joseph (at) colorado.edu).
 ### Hardware requirements
 
 We recommend a machine with at least 60 GB of RAM. 
-We used an EC2 r4.2xlarge instance on Amazon Web Services, with a prebuilt 
-Amazon Machine Image that has RStudio server:
-http://www.louisaslett.com/RStudio_AMI/
+We used an EC2 r4.2xlarge instance on Amazon Web Services.
 
 ### Software dependencies
 
