@@ -19,7 +19,9 @@ n_df <- lapply(joint_post, FUN = function(x) {
   bind_rows(.id = 'site') %>%
   mutate(class = if_else(var == 'N_uninf',
                          'Uninfected',
-                         'Infected')) %>%
+                         'Infected'))
+
+n_summary <- n_df  %>%
   group_by(site, class, t) %>%
   summarize(med = median(value),
             lo = quantile(value, .05),
@@ -43,7 +45,7 @@ dummy_df <- tibble(site = c('Alpine', 'Subalpine'),
                    med = c(100, 100),
                    date = as.Date('2010-06-15'))
 
-abundance_ts <- n_df %>%
+abundance_ts <- n_summary %>%
   filter(!is.na(class)) %>%
   ggplot(aes(date, med)) +
   geom_blank(data = dummy_df, aes(y = med), inherit.aes = FALSE) +
@@ -153,3 +155,17 @@ N_summ <- N_super %>%
             hi = quantile(Nsuper, .95))
 
 write_csv(N_summ, 'out/n_summ.csv')
+
+
+# Probability that sites were occupied prior to translocations ----------
+n_df %>%
+  mutate(t = parse_number(t)+1) %>%
+  left_join(transloc_summary) %>%
+  filter(t == 2) %>%
+  group_by(site, class) %>%
+  summarize(pr_more_than_added = mean(value > n), 
+            pr_one_present = mean(value == (n + 1)), 
+            pr_two_present = mean(value == (n + 2)), 
+            pr_three_present = mean(value == (n + 3)), 
+            pr_four_present = mean(value == (n + 4)))
+
