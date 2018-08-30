@@ -1,13 +1,15 @@
 sierra-reintroduction-cmr
 ========================================================
 
+[![DOI](https://zenodo.org/badge/134973853.svg)](https://zenodo.org/badge/latestdoi/134973853)
+
 *Maxwell B. Joseph and Roland A. Knapp*
 
 This repository contains models and data to understand how the amphibian 
 chytrid fungus *Batrachochytrium dendrobatidis* and climatic conditions drive 
 population dynamics of Sierra Nevada yellow-legged frogs.
 It combines a capture mark-recapture model with a joint model for Bd/host dynamics that accomodates known introductions of hosts.
-This is associated with the paper **Disease and climate effects on individuals jointly drive post-reintroduction population dynamics of an endangered amphibian**.
+This is associated with the paper **Disease and climate effects on individuals drive post-reintroduction population dynamics of an endangered amphibian**.
 This repo is maintained by Max Joseph (maxwell.b.joseph (at) colorado.edu).
 
 ## Reproducing the analysis
@@ -15,9 +17,7 @@ This repo is maintained by Max Joseph (maxwell.b.joseph (at) colorado.edu).
 ### Hardware requirements
 
 We recommend a machine with at least 60 GB of RAM. 
-We used an EC2 r4.2xlarge instance on Amazon Web Services, with a prebuilt 
-Amazon Machine Image that has RStudio server:
-http://www.louisaslett.com/RStudio_AMI/
+We used an EC2 r4.2xlarge instance on Amazon Web Services.
 
 ### Software dependencies
 

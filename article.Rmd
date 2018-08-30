@@ -1,5 +1,5 @@
 ---
-title: Disease and climate effects on individuals jointly drive post-reintroduction
+title: Disease and climate effects on individuals drive post-reintroduction
   population dynamics of an endangered amphibian
 bibliography: library.bib
 output:
@@ -323,7 +323,7 @@ A variational approximation was necessary for the models to run in a reasonable 
 To verify our model implementation, we simulated data with known parameters from the model to evaluate parameter recovery, and check that parameters were identifiable. 
 These simulations allowed us to identify a lack of identifiability in an earlier model specification which included multiplicative interaction terms between winter severity and Bd load for both the probability of entering the population, and the probability that new adults were infected conditional on recruitment.
 
-All code and data necessary to reproduce the analysis and manuscript is publicly available at [https://www.github.com/snarl1/sierra-reintroduction-cmr](https://www.github.com/snarl1/sierra-reintroduction-cmr). 
+All code and data necessary to reproduce the analysis and manuscript is publicly available at [https://www.github.com/snarl1/sierra-reintroduction-cmr](https://www.github.com/snarl1/sierra-reintroduction-cmr) [@joseph_2018]. 
 The workflow is wrapped into GNU Make command [@Stallman2004], the manuscript is written in R Markdown [@rmarkdown], and we used the R programming language [@r-lang] with the assertthat, ggrepel, ggridges, ggthemes, lubridate, mgcv, patchwork, reshape2, rstan, and tidyverse packages to facilitate data processing, model fitting, and visualization [@assertthat; @ggrepel; @ggridges; @ggthemes; @lubridate; @mgcv; @patchwork; @reshape2; @rstan; @tidyverse].
 The computational environment with these dependencies is containerized via Docker, and the Dockerfile for the image exists in the GitHub repository for this project [@boettiger2015introduction].
 
