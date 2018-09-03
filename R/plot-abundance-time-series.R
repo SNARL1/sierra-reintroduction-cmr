@@ -155,17 +155,3 @@ N_summ <- N_super %>%
             hi = quantile(Nsuper, .95))
 
 write_csv(N_summ, 'out/n_summ.csv')
-
-
-# Probability that sites were occupied prior to translocations ----------
-n_df %>%
-  mutate(t = parse_number(t)+1) %>%
-  left_join(transloc_summary) %>%
-  filter(t == 2) %>%
-  group_by(site, class) %>%
-  summarize(pr_more_than_added = mean(value > n), 
-            pr_one_present = mean(value == (n + 1)), 
-            pr_two_present = mean(value == (n + 2)), 
-            pr_three_present = mean(value == (n + 3)), 
-            pr_four_present = mean(value == (n + 4)))
-
