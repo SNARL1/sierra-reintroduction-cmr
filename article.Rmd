@@ -92,12 +92,22 @@ These insights will inform ongoing and future efforts aimed at restoring the  en
 The two study lakes are located in eastern Yosemite National Park (California, USA) at elevations of 2880 and 3200 m. \textit{R. sierrae} populations in both lakes were established via translocation from a single nearby donor population (elevation: 3176 m). 
 The donor population has been Bd-positive for at least two decades [@fellers2001oral], and contains one of the largest \textit{R. sierrae} populations in Yosemite (minimum population size during this study: 600-1500 adults). 
 The introduction lakes are located 5.5-7.0 km from the donor population and both contain high quality \textit{R. sierrae} habitat (i.e., fishless, 6-12 m deep, with adjacent meadow and stream habitats) [@knapp2005effects]. 
-Because these lakes harbor a sensitive species, we refer to them by the pseudonyms Alpine and Subalpine [@lindenmayer2017not].
-Visual encounter surveys [@knapp2005effects] conducted just prior to the first introductions indicated that both lakes lacked \textit{R. sierrae} of any life stage. 
-Prior to introduction, adult frogs ($\geq$ 40 mm snout-vent length (SVL)) were captured at the donor site, and tagged (8mm passive integrated transponder (PIT) tags), measured, and weighed. 
-To estimate Bd load, we also collected a skin swab from each frog using standard methods [@Hyatt2007diagnostic; @vredenburg2010dynamics]. 
+Because these lakes harbor a sensitive species, we refer to them by the pseudonyms Alpine and Subalpine [@lindenmayer2017not]. 
+At Alpine in the year 2001, five years prior to the translocation of adults into this lake, a single large adult R. sierrae was detected on a visual encounter survey [@knapp2005effects]. 
+No \textit{R. sierrae} of any life stage was detected at Alpine on a visual encounter survey conducted three weeks prior to translocation in 2006. 
+At Subalpine, a single \textit{R. sierrae} tadpole was observed on a visual encounter survey in 2001, seven years prior to adult translocations in 2008. 
+Subsequent surveys in 2005 and 2007 did not detect \textit{R. sierrae} of any life stage at Subalpine.
+Based on these observations and the widespread historical occurrence of \textit{R. sierrae} across similar lakes in Yosemite, we assumed that both lakes were historically occupied by \textit{R. sierrae}, and that these populations were extirpated prior to this study's translocations by the introduction of nonnative fish prior to 1977 and the arrival of Bd in the 1980s or 1990s based on historical declines of \textit{R. sierrae} observed at that time [@phillips1990have; @sherman1993population; @drost1996collapse]. 
+
+Prior to translocations, the presence or absence of Bd at these sites was uncertain. 
+It was thought that Bd was likely present at both Alpine and Subalpine, as Bd was ubiquitous or nearly so in Yosemite at that time [@knapp2011nowhere]. 
+Both sites and/or adjacent habitats contained other amphibians (Alpine lake: Yosemite toad \textit{Anaxyrus canorus}; Subalpine lake: \textit{A. canorus} and Pacific treefrog \textit{Hyliola regilla}), but the infection status of those species was unknown. 
+It was decided in collaboration with Yosemite National Park that reintroduced \textit{R. sierrae} populations would need to persist in the presence of Bd, because preventing individuals from becoming infected was not feasible, and there was no known means to eliminate Bd from the environment. 
+The potential risk associated with introducing Bd or a novel strain of Bd to these sites was determined to be low relative to the benefits associated with re-establishing populations of \textit{R. sierrae}. 
 
 The initial introduction of frogs to Alpine and Subalpine occurred during summer 2006 and 2008, respectively, and additional introductions to supplement both populations were conducted in subsequent years. 
+Prior to introduction, adult frogs ($\geq$ 40 mm snout-vent length (SVL)) were captured at the donor site, and tagged (8mm passive integrated transponder (PIT) tags), measured, and weighed. 
+To estimate Bd load, we also collected a skin swab from each frog using standard methods [@Hyatt2007diagnostic; @vredenburg2010dynamics]. 
 In the first introduction to Alpine, frogs were transported on foot; in all subsequent introductions to both Alpine and Subalpine, frogs were transported via helicopter. 
 The number of individuals introduced to each study site on each introduction date is provided in Table \ref{tab:table1}. 
 
@@ -443,7 +453,7 @@ In addition, the fact that the effect of Bd load on survival of infected adults 
 
 The two study lakes were relatively distant from each other and located in catchments with different environmental characteristics, but despite this Bd loads were temporally correlated across the two sites. 
 The synchrony in expected load is worth further investigation, as it may indicate environmental forcing of infection dynamics, e.g., variation due to temperature [@cohen2017thermal; @phillott2013chytridiomycosis], but see [@knapp2011nowhere], or some form of connectivity among sites, although the latter possibility seems unlikely. 
-Future studies might also seek to better disentangle landscape-wide factors driving synchrony and local factors that drive differences in mean load, particularly in the context of known mechanisms of disease-induced extinction such as non-density dependent transmission [@rachowicz2007quantifying; @orlofske2018experimental], nonamphibian reservoir hosts [@mcmahon2013chytrid], and small equilibrium densities [@de2005mechanisms]. 
+Future studies might also seek to better disentangle landscape-wide factors driving synchrony and local factors that drive differences in mean load, particularly in the context of known mechanisms of disease-induced extinction such as non-density dependent transmission [@rachowicz2007quantifying; @orlofske2018experimental], reservoir hosts [@mcmahon2013chytrid], and small equilibrium densities [@de2005mechanisms]. 
 
 Although between-population differences in Bd load provide a straightforward explanation for the lower survival of infected adults at Subalpine compared to Alpine [@briggs2010enzootic], it is less obvious why uninfected adults also had lower survival at Subalpine.
 Low uninfected survival may result from differences in habitat characteristics and/or the abundance of terrestrial or aquatic predators that prey on adult frogs. 
