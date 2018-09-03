@@ -19,7 +19,9 @@ n_df <- lapply(joint_post, FUN = function(x) {
   bind_rows(.id = 'site') %>%
   mutate(class = if_else(var == 'N_uninf',
                          'Uninfected',
-                         'Infected')) %>%
+                         'Infected'))
+
+n_summary <- n_df  %>%
   group_by(site, class, t) %>%
   summarize(med = median(value),
             lo = quantile(value, .05),
@@ -43,7 +45,7 @@ dummy_df <- tibble(site = c('Alpine', 'Subalpine'),
                    med = c(100, 100),
                    date = as.Date('2010-06-15'))
 
-abundance_ts <- n_df %>%
+abundance_ts <- n_summary %>%
   filter(!is.na(class)) %>%
   ggplot(aes(date, med)) +
   geom_blank(data = dummy_df, aes(y = med), inherit.aes = FALSE) +

@@ -50,7 +50,7 @@ fig/detection-effects.pdf: R/plot-detection-effects.R $(fits)
 fig/transition-plot.pdf: R/plot-transitions.R $(fits)
 		Rscript --vanilla R/plot-transitions.R
 
-fig/mean-bd-loads.pdf: R/plot-mean-bd-loads.R $(fits)
+fig/mean-bd-loads.pdf out/cor_prev_z.csv: R/plot-mean-bd-loads.R $(fits)
 		Rscript --vanilla R/plot-mean-bd-loads.R
 
 fig/primary-periods.pdf: R/plot-primary-periods.R $(fits)
