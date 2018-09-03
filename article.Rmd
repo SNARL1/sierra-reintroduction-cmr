@@ -513,9 +513,10 @@ B. Parameter estimates for the detection model. Each of the detection parameters
 
 ### Figure \ref{mean-bd-loads}
 
-\textit{Batrachochytrium dendrobatidis} (Bd) infection loads over time. 
+A. \textit{Batrachochytrium dendrobatidis} (Bd) infection loads over time. 
 Observed load values from skin swabs are shown as points on a log10 scale, colored by site. 
 The estimated average Bd infection load is shown as a line (posterior median) with a 90\% credible interval ribbon.
+B. Estimated Bd infection prevalence over time, with posterior medians shown as lines and 90\% credible intervals shown as shaded ribbons. 
 
 ### Figure \ref{abundance-survival-time-series}
 
