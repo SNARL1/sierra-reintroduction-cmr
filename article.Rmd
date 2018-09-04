@@ -370,7 +370,7 @@ After initial introduction in 2006 or 2008, mean loads at both sites were typica
 Thereafter, loads were relatively low and stable through 2012. 
 At both sites mean loads were uncharacteristically low in 2013 but increased in subsequent years until reaching a peak in 2016. 
 Mean Bd loads at Subalpine tended to be higher than at Alpine, particularly in the period from 2015 - 2017. 
-The estimated correlation over time between mean log Bd loads at the two study sites was `r median(unlist(bd_load_correlations)) %>% round(n_digit)` (`r quantile(unlist(bd_load_correlations), .05) %>% round(n_digit)`, `r quantile(unlist(bd_load_correlations), .95) %>% round(n_digit)`). 
+The estimated correlation over time between mean log Bd loads at the two study sites was `r median(unlist(bd_load_correlations)) %>% round(n_digit)` (`r quantile(unlist(bd_load_correlations), .05) %>% round(n_digit)`, `r quantile(unlist(bd_load_correlations), .95) %>% round(n_digit)`)  (Figure \ref{mean-bd-loads}B). 
 This correlation was not due to a shared response to winter severity because winter severity did not influence Bd load at either site (at Alpine $\beta^{(\mu)}$: `r beta_z_df %>% filter(site == "Alpine") %>% select(med) %>% df2num` (`r beta_z_df %>% filter(site == "Alpine") %>% select(lo) %>% df2num`, `r beta_z_df %>% filter(site == "Alpine") %>% select(hi) %>% df2num`), at Subalpine $\beta^{(\mu)}$: `r beta_z_df %>% filter(site == "Subalpine") %>% select(med) %>% df2num` (`r beta_z_df %>% filter(site == "Subalpine") %>% select(lo) %>% df2num`, `r beta_z_df %>% filter(site == "Subalpine") %>% select(hi) %>% df2num`).
 
 ```{r get-cor-prev}

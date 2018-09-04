@@ -56,6 +56,7 @@ load_survival_df %>%
   ylab('Survival probability') +
   scale_color_pander('') +
   scale_fill_pander('') +
-  theme(legend.position = 'top')
+  theme(legend.position = 'top',
+        panel.grid.minor = element_blank())
 save_fig('bd-load-survival', width = 7, height = 3)
 
