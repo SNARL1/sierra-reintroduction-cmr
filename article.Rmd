@@ -77,7 +77,7 @@ This presents a major challenge: infection intensity is hard to measure, but may
 Previous efforts to understand disease impacts in wild populations as a function of load at the individual level have randomly imputed missing infection load data with the observed distribution of load values [@spitzen2017fragile]. 
 However, random imputation could bias inference if load data are not missing at random, for example, if heavily infected individuals are easier or more difficult to detect than individuals with lower loads. 
 
-In this paper, we seek to understand whether introduction outcomes can explained by post-introduction disease dynamics or climatic conditions. 
+In this paper, we seek to understand whether introduction outcomes can be explained by post-introduction disease dynamics or climatic conditions. 
 We expected that failed introductions might be attributed to some combination of disease dynamics that inhibit population growth and climatic conditions that do not favor adult survival or recruitment.
 We use a Bayesian multi-state model with data from decade-long mark-recapture studies in two reintroduced frog populations.
 We find that Bd affects introduction success via impacts on adult survival.
@@ -329,12 +329,12 @@ $$[\mu | \alpha^{(\mu)}, \beta^{(\mu)}, \sigma^{(\mu)}] = \prod_{y = 1}^{n_y} \t
 Based on knowledge of the observation process, we expected that most captures resulted in a non-missing swab result, leading to the specification for the prior on $\delta$ as $[\delta] = \text{Beta}(\delta | 9, 1)$.
 Annual adjustments were modeled using zero-mean normal distributions with unknown standard deviations specific to the process of interest, e.g., for the probability of entering the population: $[\epsilon^{(\lambda)}] = \prod_{y = 1}^{n_y} \text{Normal}(\epsilon^{(\lambda)}_y | 0, \sigma^{(\epsilon^{(\lambda)})})$. 
 Standard deviation parameters were given half normal priors i.e., $[\sigma^{(\epsilon^{(\lambda)})}] = \text{Normal}_+(\sigma^{(\epsilon^{(\lambda)})} | 0, 1.5)$, and all remaining parameters were given $\text{Normal}(0, 1.5)$ priors.
-The full factorization of the joint distribution of data and parameters is provided in \hyperref[joint-distribution]{Appendix A: Joint distribution factorization}.
+The full factorization of the joint distribution of data and parameters is provided in \hyperref[joint-distribution]{Appendix S1: Joint distribution factorization}.
 
 #### Parameter estimation
 
 We implemented the model in Stan, a probabilistic programming language, and sampled from the approximate posterior distribution of parameters with automatic differentiation variational inference [@carpenter2016stan; @kucukelbir2015automatic].
-We used the forward algorithm [@zucchini2016hidden] to circumvent the need to sample from the discrete space of true individual states (see \hyperref[forward-algorithm]{Appendix B: Forward algorithm description} for details).
+We used the forward algorithm [@zucchini2016hidden] to circumvent the need to sample from the discrete space of true individual states (see \hyperref[forward-algorithm]{Appendix S2: Forward algorithm description} for details).
 Variational inference uses a simple family of distributions as an approximation of the posterior distribution, optimizing parameters of this simpler approximation (the variational distribution) to minimize the Kullback-Leibler divergence between the true posterior and the variational distribution. 
 A variational approximation was necessary for the models to run in a reasonable amount of time ($\approx 2-4$ hours) on finite resources (r4.2xlarge EC2 instances on Amazon Web Services, with 8 virtual CPUs and 61 GiB RAM). 
 To verify our model implementation, we simulated data with known parameters from the model to evaluate parameter recovery, and check that parameters were identifiable. 
@@ -370,7 +370,7 @@ After initial introduction in 2006 or 2008, mean loads at both sites were typica
 Thereafter, loads were relatively low and stable through 2012. 
 At both sites mean loads were uncharacteristically low in 2013 but increased in subsequent years until reaching a peak in 2016. 
 Mean Bd loads at Subalpine tended to be higher than at Alpine, particularly in the period from 2015 - 2017. 
-The estimated correlation over time between mean log Bd loads at the two study sites was `r median(unlist(bd_load_correlations)) %>% round(n_digit)` (`r quantile(unlist(bd_load_correlations), .05) %>% round(n_digit)`, `r quantile(unlist(bd_load_correlations), .95) %>% round(n_digit)`)  (Figure \ref{mean-bd-loads}B). 
+The estimated correlation over time between mean log Bd loads at the two study sites was `r median(unlist(bd_load_correlations)) %>% round(n_digit)` (`r quantile(unlist(bd_load_correlations), .05) %>% round(n_digit)`, `r quantile(unlist(bd_load_correlations), .95) %>% round(n_digit)`)  (Figure \ref{mean-bd-loads}A). 
 This correlation was not due to a shared response to winter severity because winter severity did not influence Bd load at either site (at Alpine $\beta^{(\mu)}$: `r beta_z_df %>% filter(site == "Alpine") %>% select(med) %>% df2num` (`r beta_z_df %>% filter(site == "Alpine") %>% select(lo) %>% df2num`, `r beta_z_df %>% filter(site == "Alpine") %>% select(hi) %>% df2num`), at Subalpine $\beta^{(\mu)}$: `r beta_z_df %>% filter(site == "Subalpine") %>% select(med) %>% df2num` (`r beta_z_df %>% filter(site == "Subalpine") %>% select(lo) %>% df2num`, `r beta_z_df %>% filter(site == "Subalpine") %>% select(hi) %>% df2num`).
 
 ```{r get-cor-prev}
@@ -380,7 +380,7 @@ cor_prev_z <- read_csv('out/cor_prev_z.csv')
 At both sites, transitioning from the uninfected to the infected adult class (gaining infection) was more likely than transitioning from the infected to uninfected class (losing infection) over most of the study period. 
 Among-year variation in transition probabilities was similar at both sites, with 2013 having higher than average loss-of-infection probabilities (Figure \ref{transition-plot}A). 
 This was most likely due to exceptionally low mean Bd loads in 2013: when Bd loads were low, adults were more likely to lose infection at both study sites, and less likely to gain infection in the Subalpine population (Figure \ref{transition-plot}B). 
-As a consequence, when mean Bd loads were high, prevalence also tended to be high (Figure \ref{mean-bd-loads}A). 
+As a consequence, when mean Bd loads were high, prevalence also tended to be high (Figure \ref{mean-bd-loads}). 
 The correlation between prevalence and mean Bd loads among infected adults was estimated to be `r cor_prev_z %>% filter(site == "Alpine") %>% select(med) %>% df2num` (`r cor_prev_z %>% filter(site == "Alpine") %>% select(lo) %>% df2num`, `r cor_prev_z %>% filter(site == "Alpine") %>% select(hi) %>% df2num`) at Alpine and `r cor_prev_z %>% filter(site == "Subalpine") %>% select(med) %>% df2num` (`r cor_prev_z %>% filter(site == "Subalpine") %>% select(lo) %>% df2num`, `r cor_prev_z %>% filter(site == "Subalpine") %>% select(hi) %>% df2num`) at Subalpine.
 
 
@@ -401,7 +401,7 @@ survival_params <- read_csv('out/survival-params.csv')
 
 Infected adults experienced decreased overwinter survival, especially in the Subalpine population, unlike uninfected adults which maintained overwinter survival that was comparable to within-summer survival (Figure \ref{abundance-survival-time-series}B). 
 Bd load reduced infected adult survival at Alpine (Figure \ref{bd-load-survival}), with $\beta^{(\phi^+, z)}$ estimated to be `r survival_params %>% filter(Parameter == 'Bd load effect', Site == 'Alpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'Bd load effect', Site == 'Alpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'Bd load effect', Site == 'Alpine') %>% select(hi) %>% df2num`) at Alpine, and `r survival_params %>% filter(Parameter == 'Bd load effect', Site == 'Subalpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'Bd load effect', Site == 'Subalpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'Bd load effect', Site == 'Subalpine') %>% select(hi) %>% df2num`) at Subalpine. 
-Winter severity appeared to increase survival of Bd infected adults at Alpine ($\beta^{(\phi^+, s)}$: `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Alpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Alpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Alpine') %>% select(hi) %>% df2num`), but may have been associated with lower survival at Subalpine (`r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Subalpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Subalpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Subalpine') %>% select(hi) %>% df2num`)). 
+Winter severity appeared to increase survival of Bd-infected adults at Alpine ($\beta^{(\phi^+, s)}$: `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Alpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Alpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Alpine') %>% select(hi) %>% df2num`), but may have been associated with lower survival at Subalpine (`r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Subalpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Subalpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Bd infected adults', Site == 'Subalpine') %>% select(hi) %>% df2num`)). 
 At both sites, winter severity coefficients overlapped zero for uninfected adults ($\beta^{(\phi^-, s)}$: `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Uninfected adults', Site == 'Alpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'SWE effect', group == 'Uninfected adults', Site == 'Alpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Uninfected adults', Site == 'Alpine') %>% select(hi) %>% df2num`) at Alpine, and `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Uninfected adults', Site == 'Subalpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'SWE effect', group == 'Uninfected adults', Site == 'Subalpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'SWE effect', group == 'Uninfected adults', Site == 'Subalpine') %>% select(hi) %>% df2num`) at Subalpine).
 Overall, uninfected adults had higher survival at Alpine ($\alpha^{(\phi^-)}$: `r survival_params %>% filter(Parameter == 'Intercept', group == 'Uninfected adults', Site == 'Alpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'Intercept', group == 'Uninfected adults', Site == 'Alpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'Intercept', group == 'Uninfected adults', Site == 'Alpine') %>% select(hi) %>% df2num`)) than Subalpine ($\alpha^{(\phi^-)}$: `r survival_params %>% filter(Parameter == 'Intercept', group == 'Uninfected adults', Site == 'Subalpine') %>% select(med) %>% df2num` (`r survival_params %>% filter(Parameter == 'Intercept', group == 'Uninfected adults', Site == 'Subalpine') %>% select(lo) %>% df2num`, `r survival_params %>% filter(Parameter == 'Intercept', group == 'Uninfected adults', Site == 'Subalpine') %>% select(hi) %>% df2num`)) (Figure \ref{abundance-survival-time-series}B).
 
@@ -544,12 +544,12 @@ The fourth primary period is a dummy period, inserted to increase the regularity
 
 A. Estimated detection probabilities as a function of survey air temperature for Bd-infected and uninfected adults. 
 The  ribbons represent the 90\% posterior credible interval, and the line represents the posterior median. 
-Predictions for Bd infected adults correspond to individuals with average infection loads at each site. 
+Predictions for Bd-infected adults correspond to individuals with average infection loads at each site. 
 B. Parameter estimates for the detection model. Each of the detection parameters are shown on the y-axis. Color indicates population.
 
 ### Figure \ref{mean-bd-loads}
 
-A. \textit{Batrachochytrium dendrobatidis} (Bd) infection loads over time. 
+A. Bd infection loads over time. 
 Observed load values from skin swabs are shown as points on a log10 scale, colored by site. 
 The estimated average Bd infection load is shown as a line (posterior median) with a 90\% credible interval ribbon.
 B. Estimated Bd infection prevalence over time, with posterior medians shown as lines and 90\% credible intervals shown as shaded ribbons. 
@@ -653,7 +653,7 @@ Dots connected by lines represent primary periods.
 
 # Appendices
 
-\subsection*{Appendix A: Joint distribution factorization}
+\subsection*{Appendix S1: Joint distribution factorization}
 \label{joint-distribution}
 
 For completeness, we specify the factorization of the joint distribution of data and parameters (the unnormalized posterior density) below. 
@@ -675,7 +675,7 @@ The resulting joint distribution is:
 \end{align*}
 
 
-\subsection*{Appendix B: Forward algorithm description}
+\subsection*{Appendix S2: Forward algorithm description}
 \label{forward-algorithm}
 
 
