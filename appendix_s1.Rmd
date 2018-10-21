@@ -1,0 +1,28 @@
+---
+title: 'Appendix S1: Joint distribution factorization'
+subtitle: 'From: **Disease and climate effects on individuals drive post-reintroduction population dynamics of an endangered amphibian** in the journal Ecosphere'
+author: 'Maxwell B. Joseph & Roland A. Knapp'
+output: 
+  pdf_document
+header-includes:
+  - \newcommand{\matr}[1]{\mathbf{#1}}
+---
+
+For completeness, we specify the factorization of the joint distribution of data and parameters (the unnormalized posterior density) below. 
+We represent all unknowns specific to the detection model as a vector $\theta^{(p)} = (\alpha^{(p)}, \beta^{(p, x)}, \beta^{(p, +)}, \beta^{(p, z)})$, parameters specific to the probability of entry model as a vector $\theta^{(\lambda)}$, to the probability of recruiting into the infected adult class given that an individual has entered the population as $\theta^{(\gamma)}$, to uninfected survival as $\theta^{(\phi^-)}$, and to the infected survival model component as $\theta^{(\phi^+)}$. 
+Concatenating these two vectors gives a vector that contains all unique survival model parameters: $\theta^{(\phi)} = (\theta^{(\phi^-)}, \theta^{(\phi^+)})$.
+Last, we represent parameters unique to transitions from the infected to uninfected class as $\theta^{(\eta^-)}$, and from the uninfected to infected class as $\theta^{(\eta^+)}$, with both concatenated as $\theta^{(\eta)} = (\theta^{(\eta^-)}, \theta^{(\eta^+)})$.
+The resulting joint distribution is:
+
+\begin{align*}
+\overbrace{\prod_{i = 1}^M [u_{i, 1:n_t}, o_{i, 1:n_j} | \theta^{(\lambda)}, \theta^{(\gamma)}, \theta^{(\phi)}, \theta^{(\eta)}, \theta^{(p)}, z_{i, 1:n_t}]}^{\text{Hidden states and observations}} \times \\
+\overbrace{ [\matr{Z} | \mu, \sigma][\mu | \alpha^{(\mu)}, \beta^{(\mu)}, \sigma^{(\mu)}] [\alpha^{(\mu)}] [\beta^{(\mu)}] [\sigma^{(\mu)}] [\sigma]}^{\text{Bd model}} \times \\
+\overbrace{ [\alpha^{(\lambda)}] [\beta^{(\lambda, w)}] [\beta^{(\lambda, s)}] [\beta^{(\lambda, 1)}] \prod_{y = 1}^{n_y}[\epsilon^{(\lambda)}_y | \sigma^{(\lambda)}] [\sigma^{(\lambda)}] }^{\text{Prior distributions}} \times \\
+[\alpha^{(\gamma)}] [\beta^{(\gamma, \mu)}] \prod_{y = 1}^{n_y}[\epsilon^{(\gamma)}_y | \sigma^{(\gamma)}] [\sigma^{(\gamma)}] \times \\
+[\alpha^{(\phi^-)}] [\beta^{(\phi^-, w)}] [\beta^{(\phi^-, s)}] \prod_{y = 1}^{n_y}[\epsilon^{(\phi^-)}_y | \sigma^{(\phi^-)}] [\sigma^{(\phi^-)}] \times \\
+[\alpha^{(\phi^+)}] [\beta^{(\phi^+, w)}] [\beta^{(\phi^+, s)}] [\beta^{(\phi^+, z)}] \prod_{y = 1}^{n_y}[\epsilon^{(\phi^+)}_y | \sigma^{(\phi^+)}] [\sigma^{(\phi^+)}] \times \\
+[\alpha^{(\eta^-)}] [\beta^{(\eta^-, \mu)}] \prod_{y = 1}^{n_y}[\epsilon^{(\eta^-)}_y | \sigma^{(\eta^-)}] [\sigma^{(\eta^-)}] \times \\
+[\alpha^{(\eta^+)}] [\beta^{(\eta^+, \mu)}] \prod_{y = 1}^{n_y}[\epsilon^{(\eta^+)}_y | \sigma^{(\eta^+)}] [\sigma^{(\eta^+)}] \times \\
+[\alpha^{(p)}] [\beta^{(p, x)}] [\beta^{(p, +)}] [\beta^{(p, z)}][\delta].
+\end{align*}
+

@@ -1,0 +1,29 @@
+---
+title: 'Appendix S2: Forward algorithm description'
+subtitle: 'From: **Disease and climate effects on individuals drive post-reintroduction population dynamics of an endangered amphibian** in the journal Ecosphere'
+author: 'Maxwell B. Joseph & Roland A. Knapp'
+output: 
+  pdf_document
+header-includes:
+  - \newcommand{\matr}[1]{\mathbf{#1}}
+---
+
+Parameter estimation for this model is made somewhat difficult by the presence of discrete parameters (hidden states).
+We address this issue by using the forward algorithm, which does not require sampling from the discrete state space, to compute the joint probability of hidden states and observations [@zucchini2016hidden].
+To describe this algorithm, we first consider the case of one individual. 
+We would like to compute $[u_{i, 1:n_t}, o_{i, 1:n_j} | ...]$ (suppressing dependence on detection and transition parameters for compactness) for the individual with state and capture history shown in Figure 1.  
+We can factor this joint probability as follows: 
+
+$$[u_{i, 1:n_t}, o_{i, 1:n_j}] = [u_{i, 1}] [u_{i, 2} | u_{i, 1}] [u_{i, 3} | u_{i, 2}] [o_{i, j = 1} | u_{i, 3}] [o_{i, j = 2} | u_{i, 3}] [u_{i, 4} | u_{i, 3}] ... [u_{i, n_t} | u_{i, n_t - 1}] [o_{i, n_j} | u_{i, n_t}].$$
+
+\noindent If all of the unknown states were known, this would be as simple as extracting the relevant probabilities from $\matr{\Psi}_{i, t}$ and $\matr{\Omega}_{i, j}$.
+Assuming that all individuals in the first primary period are in the ``not recruited'' class ($u_{i, 1} = 1 \, \forall i$) implies that $[u_{i, 1}] = (1 \, 0 \, 0 \, 0)$, where each element in the row vector represents the probability of being in hidden state 1, 2, 3, and 4, respectively.
+If we define: $\matr{P} (o_{i, j}) = \text{diag}(\matr{\Omega}_{., i, j, o_{i, j}})$ to be the square matrix acquired by placing the elements of column $o_{i, j}$ from $\matr{\Omega}_{i, j}$ along the diagonal (with zeros elsewhere), the forward algorithm provides the joint distribution of hidden states and observations as follows: 
+
+$$[u_{i, 1:n_t}, o_{i, 1:n_j}] = [u_{i, t=1}] \matr{\Psi}_{i, t=1} \matr{\Psi}_{i, t=2} \matr{P} (o_{i, j = 1}) \matr{P} (o_{i, j = 2}) \matr{\Psi}_{i, t=2} ... \matr{\Psi}_{i, t=n_t - 1}\matr{P} (o_{i, j = n_j}) \matr{1}'$$
+
+\noindent where $\matr{1}'$ is a column vector of ones. 
+More generally, we can compute this probability by defining $\matr{B}_{i, t} = \matr{\Psi}_{i, t - 1} \prod_{j \sim t} \matr{P} (o_{i, j})$, where $j \sim t$ indicates surveys that took place in primary period $t$ (if no surveys took place, then $\matr{B}_{i, t} = \matr{\Psi}_{i, t - 1}$).
+Then bringing back dependence on all other detection and transition parameters into our notation, we can compute the joint probability of hidden states and the observation history compactly as: 
+
+$$[u_{i, 1:n_t}, o_{i, 1:n_j} | \theta^{(\lambda)}, \theta^{(\gamma)}, \theta^{(\phi)}, \theta^{(\eta)}, \theta^{(p)}, z_{i, 1:n_t}] = [u_{i, t=1}] \prod_{t  = 2}^{n_t}\matr{B}_{i, t} \matr{1}'.$$
