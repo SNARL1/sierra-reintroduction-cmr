@@ -90,7 +90,7 @@ These insights will inform ongoing and future efforts aimed at restoring the  en
 ## Field sites and methods
 
 The two study lakes are located in eastern Yosemite National Park (California, USA) at elevations of 2880 and 3200 m. \textit{R. sierrae} populations in both lakes were established via translocation from a single nearby donor population (elevation: 3176 m). 
-The donor population has been Bd-positive for at least two decades [@fellers2001oral], and contains one of the largest \textit{R. sierrae} populations in Yosemite (minimum population size during this study: 600-1500 adults). 
+The donor population has been Bd positive for at least two decades [@fellers2001oral], and contains one of the largest \textit{R. sierrae} populations in Yosemite (minimum population size during this study: 600-1500 adults). 
 The introduction lakes are located 5.5-7.0 km from the donor population and both contain high quality \textit{R. sierrae} habitat (i.e., fishless, 6-12 m deep, with adjacent meadow and stream habitats) [@knapp2005effects]. 
 Because these lakes harbor a sensitive species, we refer to them by the pseudonyms Alpine and Subalpine [@lindenmayer2017not]. 
 At Alpine in the year 2001, five years prior to the translocation of adults into this lake, a single large adult R. sierrae was detected on a visual encounter survey [@knapp2005effects]. 
@@ -240,7 +240,7 @@ For these introductions, all introduced adults were infected, and thus recruited
 
 An imaginary first primary period augments the collection of primary periods when introductions took place and when surveys occurred, and was set to occur one week before the initial introductions into each population. 
 For this augmented period $t = 1$, we assume that all individuals are in the ``not-recruited'' class, $u_{i, 1} = 1$ for $i = 1, ..., M$ (Figure 1). 
-Given that neither lake was known to contain adult frogs immediately prior to introduction, this is potentially a fair assumption, but in case the assumption was violated and adults were present prior to the introduction, we include a time-varying adjustment into the recruitment model (described below).
+Given that neither lake was known to contain adult frogs immediately prior to introduction, this is potentially a fair assumption, but in case the assumption was violated and adults were present prior to the introduction, we include a time-varying adjustment into the recruitment model (see Parameter model - 2. Recruitment model).
 
 The number of primary periods was not uniform across survey years, and as such, the time between primary periods was also heterogeneous, complicating the interpretation of transition probabilities. 
 Thus, at both sites, we used augmented primary periods to increase the regularity of time intervals between primary periods. 
@@ -492,7 +492,7 @@ It is our hope that the framework developed here can be leveraged to better unde
 
 We thank the following people and institutions for important contributions to this study: numerous people who assisted with the field work (especially N. Kauffman, A. Killion, A. Lindauer, J. Maurer, and S. Ostoja); R. Chen, K. Rose, and M. Toothman for qPCR assistance; C. Briggs and M. Wilber for reviewing an earlier draft of the manuscript; and Yosemite National Park (R. Grasso, H. McKenny, and S. Thompson), U.S. Geological Survey - Western Ecological Research Center (M. Brooks and S. Ostoja), and  the University of California Natural Reserve System - Sierra Nevada Aquatic Research Laboratory (DOI: 10.21973/N3966F) for logistical support and valuable discussions. 
 Research permits were provided by Yosemite National Park, U.S. Fish and Wildlife Service, and the Institutional Animal Care and Use Committee at the University of California, Santa Barbara. 
-This project was funded by grants from the National Park Service (to R.A.K), Yosemite Conservancy (to Yosemite National Park and R.A.K.), U.S. Geological Survey (Ecosystems Mission Area - Natural Resource Preservation Program, to M. Brooks and R. Knapp for the project titled ``Factors influencing reintroduction success of the endangered mountain yellow-legged frog'', and National Science Foundation (DEB-1557190, to C. Briggs and R. Knapp).
+This project was funded by grants from the National Park Service (to R.A.K), Yosemite Conservancy (to Yosemite National Park and R.A.K.), U.S. Geological Survey (Ecosystems Mission Area - Natural Resource Preservation Program, to M. Brooks and R. Knapp for the project titled ``Factors influencing reintroduction success of the endangered mountain yellow-legged frog''), and National Science Foundation (DEB-1557190, to C. Briggs and R. Knapp).
 We also thank H. Ito for translating mark-recapture model specifications from JAGS to Stan, as this greatly simplified our implementation. 
 
 \bigskip \noindent
