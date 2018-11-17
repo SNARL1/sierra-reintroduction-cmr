@@ -7,6 +7,7 @@ RUN apt-get update \
 	apt-utils \
 	ed \
 	libnlopt-dev \
+	pdftk \
 	texlive-full \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/
