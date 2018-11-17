@@ -26,11 +26,14 @@ weather_data = data/dana_meadows_snow_depth_2006-2017.csv \
 	
 appendices = appendix_s1.pdf appendix_s2.pdf
 
-all: article.pdf R/model-verification.pdf $(appendices)
+all: merged.pdf R/model-verification.pdf
 
+merged.pdf: article.pdf $(named_figs) $(appendices)
+		Rscript -e "rmarkdown::render('article.Rmd', params = list(include_figs = TRUE), output_file = 'article_w_figs.pdf')"
+		pdftk article_w_figs.pdf $(appendices) cat output merged.pdf
+		rm article_w_figs.pdf
 
-
-article.pdf: $(named_figs) article.Rmd library.bib
+article.pdf: $(named_figs) $(figs) article.Rmd library.bib
 		Rscript -e "rmarkdown::render('article.Rmd')"
 
 R/model-verification.pdf: R/model-verification.Rmd

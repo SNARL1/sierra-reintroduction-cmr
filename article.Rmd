@@ -9,15 +9,19 @@ output:
           in_header: header.sty
 fontsize: 12pt
 csl: ecology.csl
+params:
+  include_figs: FALSE
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, include = FALSE)
-library("knitcitations")
-cleanbib()
-options("citation_format" = "pandoc")
+
+library(knitcitations)
 library(lubridate)
 library(tidyverse)
+
+cleanbib()
+options("citation_format" = "pandoc")
 n_digit <- 3
 df2num <- function(df, n_digit = 3) {
   stopifnot(nrow(df) == 1)
@@ -591,3 +595,65 @@ Estimated cumulative number of natural recruits into the adult population at bot
 The ribbons represent the 90\% posterior credible interval, with the midline representing the posterior median. 
 Dots connected by lines represent primary periods.
 
+
+```{r, echo=FALSE, results='asis', eval=params$include_figs, include=TRUE}
+cat("
+\\newpage
+
+\\begin{figure}[ht] 
+\\caption{}
+\\includegraphics[width=\\textwidth]{figure1.pdf}
+\\label{hmm-structure} 
+\\end{figure}
+\\newpage
+
+\\begin{figure}[ht] 
+\\caption{}
+\\includegraphics[width=\\textwidth]{figure2.pdf}
+\\label{detection-effects}
+\\end{figure}
+\\newpage
+
+\\begin{figure}[ht] 
+\\caption{}
+\\includegraphics[width=\\textwidth]{figure3.pdf}
+\\label{mean-bd-loads}
+\\end{figure}
+\\newpage
+
+\\begin{figure}[ht] 
+\\caption{}
+\\includegraphics[width=\\textwidth]{figure4.pdf}
+\\label{transition-plot} 
+\\end{figure}
+\\newpage
+
+\\begin{figure}[ht] 
+\\caption{}
+\\includegraphics[width=.95\\textwidth]{figure5.pdf}
+\\label{abundance-survival-time-series}
+\\end{figure}
+\\newpage
+
+\\begin{figure}[ht] 
+\\caption{}
+\\includegraphics[width=\\textwidth]{figure6.pdf}
+\\label{bd-load-survival}
+\\end{figure}
+\\newpage
+
+\\begin{figure}[ht] 
+\\caption{}
+\\includegraphics[width=\\textwidth]{figure7.pdf}
+\\label{introduced-adult-survival}
+\\end{figure}
+\\newpage
+
+\\begin{figure}[ht]
+\\caption{}
+\\includegraphics[width=\\textwidth]{figure8.pdf}
+\\label{recruitment-time-series}
+\\end{figure}
+\\newpage
+")
+```
