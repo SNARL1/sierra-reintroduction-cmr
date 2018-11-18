@@ -54,15 +54,16 @@ To run the Docker container, first
 [install Docker](https://docs.docker.com/installation) if necessary then run:
 
 ```bash
-docker run -d -p 8787:8787 mbjoseph/sierra-reintroduction-cmr
+docker run -d -e PASSWORD=yourpassword -p 8787:8787 mbjoseph/sierra-reintroduction-cmr
 ```
 
 This will launch an RStudio server on port 8787.
 If running locally navigate to http://localhost:8787, and if running on AWS 
 replace localhost with the Public DNS (IPv4) of your EC2 instance, ensuring 
 that the security group allows inbound access to port 8787.
-Once at the login prompt, you can log in with username rstudio, and password 
-rstudio. 
+Once at the login prompt, you can log in with username rstudio, and the 
+password provided in your call to `docker run` (e.g., `yourpassword` in the 
+example above).
 If you are running a cloud instance that allows inbound access from all IP 
 addresses, use the terminal program `passwd` to change the password to something
 better.
