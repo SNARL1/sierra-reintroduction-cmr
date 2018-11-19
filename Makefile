@@ -121,7 +121,8 @@ figure8.pdf: fig/recruitment-time-series.pdf
 
 
 clean:
-		rm *.rds
-		rm *.RData
-		rm Rplots.pdf
-		rm article.pdf
+		rm -f *.rds
+		rm -f *.RData
+		rm -f Rplots.pdf
+		rm -f article.pdf
+		rm -f out/*.csv
